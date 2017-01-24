@@ -16,8 +16,8 @@ import xml.etree.ElementTree as ET
 # e.g. http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=MLB&period=20120929
 url = 'http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=%s&period=%d'
 
-focusTeam = 'Maple Leafs' #this program focuses on one specific team.
-#focusTeam = 'Blackhawks'
+#focusTeam = 'Maple Leafs' #this program focuses on one specific team.
+focusTeam = 'Blackhawks'
 
 def today(league):
     yyyymmdd = int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
@@ -55,7 +55,7 @@ def today(league):
             })
     except Exception, e:
         print e
-    print games
+    #print games
     return games
 
 def generateReport():
