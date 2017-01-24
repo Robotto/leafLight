@@ -106,8 +106,12 @@ if __name__ == "__main__":
                 conn.send(report)  # +'\n')  # echo
                 print 'TX:', report
 
-                print 'closing conneciton'
+                print 'closing connection'
                 conn.close()
+
+                time.sleep(10)
+
+
 
 
         except Exception as e:
