@@ -1,3 +1,7 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+
+
 #include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
 #include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
 
@@ -27,7 +31,17 @@ SSD1306  display(0x3c, D2, D1);
 // SH1106 display(0x3c, D3, D5);
 
 
+//URL informationer
+const char* host = "sardukar.moore.dk"; // fx ddlab.dk
+//String url = "test"; //fx: detDerKommerEfterSkråstregen i ddlab.dk/test
+
+//WiFi informationer
+const char* ssid     = "robottoAP";
+const char* password = "dillerdiller";
+
+
 void setup() {
+  WiFi.hostname("LeafLight");
   pinMode(D6,OUTPUT);
   Serial.begin(115200);
   Serial.println();
@@ -47,10 +61,33 @@ void setup() {
 
 display.clear();
   
+display.display();
+  wifiConnect();
+}
 
-  display.drawString(0, 10, String(millis()));
+void wifiConnect() {
+  // We start by connecting to a WiFi network
+  display.drawString(0, 10, "Connecting to:");
+  display.drawString(0, 20, ssid);
+
+  display.display();
+
+  WiFi.begin(ssid, password);
+
+  int dotCounter=0;
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    display.drawString(0+dotCounter*4,30,".");
+    dotCounter++;
     display.display();
+  }
 
+  display.clear();
+  display.drawString(0,10,"WiFi connected!");
+  display.drawString(0,20,"IP address:");
+  String ipString=String(WiFi.localIP()[0]) + "." + String(WiFi.localIP()[1]) + "." + String(WiFi.localIP()[2]) + "." + String(WiFi.localIP()[3]);
+  display.drawString(0,30, ipString);
+  display.display();
 }
 
 void drawFontFaceDemo() {
@@ -78,16 +115,35 @@ void drawLeaf() {
 
 
 
-
 void loop() {
 
+WiFiClient client;
 
-  delay(100);
-display.clear();
-    display.drawString(0, 10, String(millis()));
-    display.display();
+  const int httpPort = 9999;
+  if (!client.connect(host, httpPort)) {
+    Serial.println("connection failed");
+    return;
+  }
+
+  
+  delay(10);
+  int inputPointer=0;
+  // Read all the lines of the reply 
+  while(client.available()){
+
+    //tcpBuffer[inputPointer++]=client.read();
+    //if(inputPointer>127) inputPointer=0; //safety joe.
+    //tcpBuffer = client.readStringUntil('\r');
+    Serial.println(client.read());
+    
+    
+  }
 
 
-
+//if((char)tcpBuffer[0]=='1') Serial.println("active game!");
+//    else if((char)tcpBuffer[0]=='0') Serial.println("upcoming game.");
+ //   else if((char)tcpBuffer[0]=='e') Serial.println("error");
+    
+  
   
 }
