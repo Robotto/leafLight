@@ -125,18 +125,27 @@ WiFiClient client;
     return;
   }
 
+  while (client.available() == 0) {
+    if (millis() - timeout > 5000) {
+      Serial.println(">>> Client Timeout !");
+      client.stop();
+      return;
+    }
+  }
   
   delay(500);
 
   //int inputPointer=0;
   // Read all the lines of the reply 
   while(client.available()){
-    Serial.println("RX!");
     //tcpBuffer[inputPointer++]=client.read();
     //if(inputPointer>127) inputPointer=0; //safety joe.
     //tcpBuffer = client.readStringUntil('\r');
-    Serial.println(client.readString());
-    
+      while(client.available()){
+    String line = client.readStringUntil('\r');
+    Serial.print(line);
+    }
+
     
   }
 
