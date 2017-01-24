@@ -73,7 +73,7 @@ def generateReport():
                 #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
         
         if report!=None:
-            print 'Matched ' + focusTeam + ' @ game number ' + str(index) + ': ' + str(game)
+            print 'Matched ' + focusTeam + ' @ game number ' + str(index) #+ ': ' + str(game)
             return report
     return 'e' + '\r'
 
@@ -98,19 +98,21 @@ if __name__ == "__main__":
         try:
             conn, addr = s.accept()
             print time.ctime(), 'Connection from:', addr
-            while True:  # looks like connection timeout is ~60 seconds.
 
-                print time.ctime(), 'Getting games. Looking for ' + focusTeam + ' games.'
-                report = generateReport()
+#            while True:  # looks like connection timeout is ~60 seconds.
 
-                conn.send(report)  # +'\n')  # echo
-                print 'TX:', report
+            print time.ctime(), 'Getting games. Looking for ' + focusTeam + ' games.'
+            report = generateReport()
 
-                print 'closing connection'
-                conn.shutdown(socket.SHUT_RDWR)
-                conn.close()
+            conn.send(report)  # +'\n')  # echo
+            print 'TX:', report
 
-                time.sleep(10)
+
+            print 'closing connection'
+            conn.shutdown(socket.SHUT_RDWR)
+            conn.close()
+
+            time.sleep(10)
 
 
 
