@@ -124,11 +124,13 @@ WiFiClient client;
     Serial.println("connection failed");
     return;
   }
-
+ 
+  unsigned long timeout = millis();
   while (client.available() == 0) {
     if (millis() - timeout > 5000) {
       Serial.println(">>> Client Timeout !");
       client.stop();
+      delay(30000);
       return;
     }
   }
@@ -141,19 +143,18 @@ WiFiClient client;
     //tcpBuffer[inputPointer++]=client.read();
     //if(inputPointer>127) inputPointer=0; //safety joe.
     //tcpBuffer = client.readStringUntil('\r');
-      while(client.available()){
     String line = client.readStringUntil('\r');
     Serial.print(line);
     }
-
-    
-  }
-
 
 //if((char)tcpBuffer[0]=='1') Serial.println("active game!");
 //    else if((char)tcpBuffer[0]=='0') Serial.println("upcoming game.");
  //   else if((char)tcpBuffer[0]=='e') Serial.println("error");
     
-  
-  
 }
+
+
+    
+  
+  
+
