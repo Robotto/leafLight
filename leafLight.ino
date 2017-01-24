@@ -126,15 +126,16 @@ WiFiClient client;
   }
 
   
-  delay(10);
-  int inputPointer=0;
+  delay(500);
+
+  //int inputPointer=0;
   // Read all the lines of the reply 
   while(client.available()){
-
+    Serial.println("RX!");
     //tcpBuffer[inputPointer++]=client.read();
     //if(inputPointer>127) inputPointer=0; //safety joe.
     //tcpBuffer = client.readStringUntil('\r');
-    Serial.println(client.read());
+    Serial.println(client.readString());
     
     
   }
