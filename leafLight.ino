@@ -55,13 +55,36 @@ void setup() {
   display.setFont(ArialMT_Plain_10);
 
 
-  drawLeaf();
+  //drawLeaf();
 
-  delay(1500);
+  //delay(1500);
 
 display.clear();
   
 display.display();
+
+        display.clear();
+        display.setTextAlignment(TEXT_ALIGN_CENTER);
+        display.setFont(Roboto_Bold_36);
+
+        display.drawString(20, 2, "10");
+        display.drawString(110, 2, "22");
+
+        display.setFont(ArialMT_Plain_16);
+        display.drawString(64, 30, "3rd period");        
+        display.setFont(ArialMT_Plain_10);
+        display.drawString(64, 38, "VS");        
+
+
+        display.setFont(ArialMT_Plain_10);
+        display.setTextAlignment(TEXT_ALIGN_LEFT);
+        display.drawString(0, 48, "Leafs");        
+        display.setTextAlignment(TEXT_ALIGN_RIGHT);
+        display.drawString(128, 48, "Johns");        
+        display.display();        
+
+        while(1);
+
   wifiConnect();
 }
 
@@ -128,6 +151,11 @@ int pound4;
 int pound5;
 int pound6;
 
+int oldHomeScore;
+int oldAwayScore;
+
+bool score;
+
 void loop() {
 
 WiFiClient client;
@@ -168,7 +196,34 @@ const int httpPort = 9999;
     }
 
    
+    Serial.print("Home Team: "); Serial.println(homeTeam);
+    Serial.print("Away Team: "); Serial.println(awayTeam);
+
+    if(activeGame){
+
+        //print active game screen
+
+    /*display.setFont(ArialMT_Plain_16);
+    display.drawString(0, 10, "Hello world");
+    display.setFont(ArialMT_Plain_24);
+    display.drawString(0, 26, "Hello world");*/
+
+        //handle score bool
+
+        Serial.print("Home Score: "); Serial.println(homeScore);
+        Serial.print("Away Score: "); Serial.println(awayScore);
+        Serial.print("@: "); Serial.println(gameTime);
+      }
+    else{
+
+        //print upcoming game info
+
+        
+
+        Serial.print("Game starts at: "); Serial.println(gameStart);
+      }
    
+
 
     Serial.println(">>> Sleep for 5 minutes.");
     //delay(5*60*1000);
@@ -208,6 +263,8 @@ void parseLine(String line)
         awayScore = line.substring(pound4+1,pound5);
         gameTime  = line.substring(pound5+1,pound6);
 
+        if(homeScore.toInt()!=oldHomeScore) {score=true; oldHomeScore=homeScore.toInt();}
+        if(awayScore.toInt()!=oldAwayScore) {score=true; oldAwayScore=awayScore.toInt();}
 
 
       }
@@ -236,17 +293,7 @@ void parseLine(String line)
     homeTeam = line.substring(2,pound2);
     awayTeam = line.substring(pound2+1,pound3);
 
-    Serial.print("Home Team: "); Serial.println(homeTeam);
-    Serial.print("Away Team: "); Serial.println(awayTeam);
-
-    if(activeGame){
-        Serial.print("Home Score: "); Serial.println(homeScore);
-        Serial.print("Away Score: "); Serial.println(awayScore);
-        Serial.print("@: "); Serial.println(gameTime);
-      }
-    else{
-        Serial.print("Game starts at: "); Serial.println(gameStart);
-      }
+    
 
 }
   
