@@ -107,6 +107,7 @@ if __name__ == "__main__":
                 print 'TX:', report
 
                 print 'closing connection'
+                conn.shutdown(socket.SHUT_RDWR)
                 conn.close()
 
                 time.sleep(10)
