@@ -124,7 +124,7 @@ const int httpPort = 9999;
     Serial.println(">>> tcp connection failed!");
     return;
   }
- 
+
   unsigned long timeout = millis();
   while (client.available() == 0) {
     if (millis() - timeout > 5000) {
@@ -135,7 +135,7 @@ const int httpPort = 9999;
     }
   }
   
-  delay(500);
+  Serial.println(">>> RX!: ");
 
   //int inputPointer=0;
   // Read all the lines of the reply 
@@ -146,6 +146,10 @@ const int httpPort = 9999;
     String line = client.readStringUntil('\r');
     Serial.print(line);
     }
+
+   client.stop();
+   Serial.println(">>> Disconnecting.");
+   
 
     Serial.println(">>> Sleep for 30 seconds.");
     delay(30000);
