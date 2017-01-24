@@ -104,6 +104,7 @@ void drawFontFaceDemo() {
 
 
 void drawLeaf() {
+    display.clear();
     // see http://blog.squix.org/2015/05/esp8266-nodemcu-how-to-create-xbm.html
     // on how to create xbm files
     //display.drawXbm(34, 14, WiFi_Logo_width, WiFi_Logo_height, WiFi_Logo_bits);
@@ -113,7 +114,19 @@ void drawLeaf() {
     display.display();
 }
 
+bool activeGame;
+String homeTeam;
+String awayTeam;
+String homeScore;
+String awayScore;
+String gameStart;
+String gameTime;
 
+int pound2;
+int pound3;
+int pound4;
+int pound5;
+int pound6;
 
 void loop() {
 
@@ -135,7 +148,7 @@ const int httpPort = 9999;
     }
   }
   
-  Serial.println(">>> RX!: ");
+  Serial.print(">>> RX!: ");
 
   //int inputPointer=0;
   // Read all the lines of the reply 
@@ -144,16 +157,22 @@ const int httpPort = 9999;
     //if(inputPointer>127) inputPointer=0; //safety joe.
     //tcpBuffer = client.readStringUntil('\r');
     String line = client.readStringUntil('\r');
-    Serial.print(line);
+    Serial.println(line);
+
+    client.stop();
+    Serial.println();
+    Serial.println(">>> Disconnecting.");
+
+    parseLine(line);
+
     }
 
-   client.stop();
-   Serial.println(">>> Disconnecting.");
+   
    
 
-    Serial.println(">>> Sleep for 30 seconds.");
-    delay(30000);
-
+    Serial.println(">>> Sleep for 5 minutes.");
+    //delay(5*60*1000);
+    delay(15000);
 
 //if((char)tcpBuffer[0]=='1') Serial.println("active game!");
 //    else if((char)tcpBuffer[0]=='0') Serial.println("upcoming game.");
@@ -162,7 +181,74 @@ const int httpPort = 9999;
 }
 
 
+void parseLine(String line)
+{
+    if(line.charAt(0) == '1') activeGame=true;
+
+    else if(line.charAt(0) == '0') activeGame=false;//upcoming games in data
+
+    else if(line.charAt(0) == 'e') { drawLeaf(); return; }//no games with target team in data 
+
+    else { drawLeaf(); return; }//error in data
     
+    //1#Blackhawks#Lightning#2#4#1st quarter#
+    // |          |         | | |           |
+    // 1          2         3 4 5           6
+
+    if(activeGame){ 
+        Serial.println("Game active!");
+        
+        pound2=line.indexOf('#',2);
+        pound3=line.indexOf('#',pound2+1);
+        pound4=line.indexOf('#',pound3+1);
+        pound5=line.indexOf('#',pound4+1);
+        pound6=line.indexOf('#',pound5+1);
+
+        homeScore = line.substring(pound3+1,pound4);
+        awayScore = line.substring(pound4+1,pound5);
+        gameTime  = line.substring(pound5+1,pound6);
+
+
+
+      }
+
+    //0#Blackhawks#Lightning#2017-01-25 02:30:00#
+    // |          |         |                   |
+    // 1          2         3                   4
+
+
+    else{ 
+
+        Serial.println("Upcoming game!");
+
+        pound2=line.indexOf('#',2);
+        pound3=line.indexOf('#',pound2+1);
+        pound4=line.indexOf('#',pound3+1);
+
+        //Serial.print("pound2 index: "); Serial.println(pound2);
+        //Serial.print("pound3 index: "); Serial.println(pound3);
+        //Serial.print("pound4 index: "); Serial.println(pound4);
+
+
+        gameStart = line.substring(pound3+1,pound4);
+      }
+
+    homeTeam = line.substring(2,pound2);
+    awayTeam = line.substring(pound2+1,pound3);
+
+    Serial.print("Home Team: "); Serial.println(homeTeam);
+    Serial.print("Away Team: "); Serial.println(awayTeam);
+
+    if(activeGame){
+        Serial.print("Home Score: "); Serial.println(homeScore);
+        Serial.print("Away Score: "); Serial.println(awayScore);
+        Serial.print("@: "); Serial.println(gameTime);
+      }
+    else{
+        Serial.print("Game starts at: "); Serial.println(gameStart);
+      }
+
+}
   
   
 
