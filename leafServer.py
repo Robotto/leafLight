@@ -1,15 +1,22 @@
+#!/usr/bin/env python
+
 import pytz
 import datetime
 import time
 import urllib2
 import json
 import os
+import socket
+from IPy import IP
+
+
 # import elementtree.ElementTree as ET
 import xml.etree.ElementTree as ET
 
 # e.g. http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=MLB&period=20120929
 url = 'http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=%s&period=%d'
 
+focusTeam = 'Maple Leafs' #this program focuses on one specific team.
 
 def today(league):
     yyyymmdd = int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
@@ -50,17 +57,53 @@ def today(league):
 
     return games
 
+def generateReport():
+    report='e'
+    for game in today('NHL'):
+        if game['home'] == focusTeam or game['away'] == focusTeam:
+            if game['status'] == 'In-Progress': #active focusteam games in list
+                report = '1' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(game['home-score']) + '\0' + str(game['away-score']) + '\0' + game['clock-section'] + '\0'
+                return report
+                #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
+            else: #no active focusteam game in list
+                report = '0' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(game['start']) + '\0'
+                #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
+                #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
+                return report
 
 if __name__ == "__main__":
-    print today('NHL')
-    for game in today('NHL'):
-        if game['status'] == 'In-Progress':
-            print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
-            if game['home'] == 'Maple Leafs' or game['away'] == 'Maple Leafs':
-                pass #Do a thing
-        else:
-            #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
-            print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
-            if game['home'] == 'Maple Leafs' or game['away'] == 'Maple Leafs':
-                pass #do another thing
 
+    print time.ctime(), "startup!"
+
+    TCP_IP = '5.79.74.16'
+    #TCP_IP = '127.0.0.1'
+    TCP_PORT = 9999
+    BUFFER_SIZE = 20  # Normally 1024, but we want fast response
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,
+                 1)  # make socket reuseable, for debugging (enables you to rerun the program before the socket has timed out)
+    s.bind((TCP_IP, TCP_PORT))
+    s.listen(1)
+
+    print 'Done.. Opening TCP port', TCP_PORT
+
+    while True:
+        try:
+            conn, addr = s.accept()
+            print time.ctime(), 'Connection from:', addr
+            while True:  # looks like connection timeout is ~60 seconds.
+
+                print time.ctime(), 'getting games'
+                report = generateReport()
+
+                conn.send(report)  # +'\n')  # echo
+                print 'TX:', report
+
+                time.sleep(30)
+
+        except Exception as e:
+            # print "hmm.. It looks like there was an error: " + str(e)
+            print time.ctime(), 'Client disconnected... :', str(e)
+            print '--------------------------'
+            conn.close()
