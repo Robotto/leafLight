@@ -65,17 +65,17 @@ def generateReport():
     #for game in today('NHL'):
         if game['home'] == focusTeam or game['away'] == focusTeam:
             if game['status'] == 'In-Progress': #active focusteam games in list
-                report = '1' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(game['home-score']) + '\0' + str(game['away-score']) + '\0' + game['clock-section'] + '\0'
+                report = '1' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(game['home-score']) + '\0' + str(game['away-score']) + '\0' + game['clock-section'] + '\0' + '\r'
                 #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
             elif game['status'] == 'Pre-Game': #no active focusteam game in list
-                report = '0' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(datetime.datetime.fromtimestamp(game['start'])) + '\0'
+                report = '0' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(datetime.datetime.fromtimestamp(game['start'])) + '\0' + '\r'
                 #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
                 #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
         
         if report!=None:
             print 'Matched ' + focusTeam + ' @ game number ' + str(index) + ': ' + str(game)
             return report
-    return 'e'
+    return 'e' + '\r'
 
 if __name__ == "__main__":
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     #TCP_IP = '5.79.74.16'
     TCP_IP = '127.0.0.1'
     TCP_PORT = 9999
-    BUFFER_SIZE = 20  # Normally 1024, but we want fast response
+    BUFFER_SIZE = 128  # Normally 1024, but we want fast response
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,
