@@ -16,8 +16,8 @@ import xml.etree.ElementTree as ET
 # e.g. http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=MLB&period=20120929
 url = 'http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=%s&period=%d'
 
-#focusTeam = 'Maple Leafs' #this program focuses on one specific team.
-focusTeam = 'Blackhawks'
+focusTeam = 'Maple Leafs' #this program focuses on one specific team.
+#focusTeam = 'Blackhawks'
 
 def today(league):
     yyyymmdd = int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
@@ -101,18 +101,15 @@ if __name__ == "__main__":
 
 #            while True:  # looks like connection timeout is ~60 seconds.
 
-            print time.ctime(), 'Getting games. Looking for ' + focusTeam + ' games.'
+            print 'Getting games. Looking for ' + focusTeam + ' games.'
             report = generateReport()
 
             conn.send(report)  # +'\n')  # echo
             print 'TX:', report
 
-
             print 'Closing connection'
             conn.shutdown(socket.SHUT_RDWR)
             conn.close()
-
-            time.sleep(10)
 
             print '--------------------------'
             print 
