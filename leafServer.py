@@ -16,7 +16,8 @@ import xml.etree.ElementTree as ET
 # e.g. http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=MLB&period=20120929
 url = 'http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=%s&period=%d'
 
-focusTeam = 'Maple Leafs' #this program focuses on one specific team.
+#focusTeam = 'Maple Leafs' #this program focuses on one specific team.
+focusTeam = 'Blackhawks'
 
 def today(league):
     yyyymmdd = int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
@@ -54,29 +55,34 @@ def today(league):
             })
     except Exception, e:
         print e
-
+    #print games
     return games
 
 def generateReport():
-    report='e'
-    for game in today('NHL'):
+    report=None
+    for index,game in enumerate(today('NHL')):
+
+    #for game in today('NHL'):
         if game['home'] == focusTeam or game['away'] == focusTeam:
             if game['status'] == 'In-Progress': #active focusteam games in list
                 report = '1' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(game['home-score']) + '\0' + str(game['away-score']) + '\0' + game['clock-section'] + '\0'
-                return report
                 #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
-            else: #no active focusteam game in list
-                report = '0' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(game['start']) + '\0'
+            elif game['status'] == 'Pre-Game': #no active focusteam game in list
+                report = '0' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(datetime.datetime.fromtimestamp(game['start'])) + '\0'
                 #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
                 #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
-                return report
+        
+        if report!=None:
+            print 'Matched ' + focusTeam + ' @ game number ' + str(index) + ': ' + str(game)
+            return report
+    return 'e'
 
 if __name__ == "__main__":
 
     print time.ctime(), "startup!"
 
-    TCP_IP = '5.79.74.16'
-    #TCP_IP = '127.0.0.1'
+    #TCP_IP = '5.79.74.16'
+    TCP_IP = '127.0.0.1'
     TCP_PORT = 9999
     BUFFER_SIZE = 20  # Normally 1024, but we want fast response
 
@@ -94,7 +100,7 @@ if __name__ == "__main__":
             print time.ctime(), 'Connection from:', addr
             while True:  # looks like connection timeout is ~60 seconds.
 
-                print time.ctime(), 'getting games'
+                print time.ctime(), 'Getting games. Looking for ' + focusTeam + ' games.'
                 report = generateReport()
 
                 conn.send(report)  # +'\n')  # echo
