@@ -55,7 +55,7 @@ def today(league):
             })
     except Exception, e:
         print e
-    #print games
+    print games
     return games
 
 def generateReport():
