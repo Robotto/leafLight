@@ -65,17 +65,17 @@ def generateReport():
     #for game in today('NHL'):
         if game['home'] == focusTeam or game['away'] == focusTeam:
             if game['status'] == 'In-Progress': #active focusteam games in list
-                report = '1' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(game['home-score']) + '\0' + str(game['away-score']) + '\0' + game['clock-section'] + '\0' + '\r'
+                report = '1' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(game['home-score']) + '\0' + str(game['away-score']) + '\0' + game['clock-section'] + '\0' + '\n'
                 #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
             elif game['status'] == 'Pre-Game': #no active focusteam game in list
-                report = '0' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(datetime.datetime.fromtimestamp(game['start'])) + '\0' + '\r'
+                report = '0' + '\0' + game['home'] + '\0' + game['away'] + '\0' + str(datetime.datetime.fromtimestamp(game['start'])) + '\0' + '\n'
                 #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
                 #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
         
         if report!=None:
             print 'Matched ' + focusTeam + ' @ game number ' + str(index) + ': ' + str(game)
             return report
-    return 'e' + '\r'
+    return 'e' + '\n'
 
 if __name__ == "__main__":
 
