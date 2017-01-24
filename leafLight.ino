@@ -118,10 +118,10 @@ void drawLeaf() {
 void loop() {
 
 WiFiClient client;
+const int httpPort = 9999;
 
-  const int httpPort = 9999;
   if (!client.connect(host, httpPort)) {
-    Serial.println("connection failed");
+    Serial.println(">>> tcp connection failed!");
     return;
   }
  
@@ -146,6 +146,10 @@ WiFiClient client;
     String line = client.readStringUntil('\r');
     Serial.print(line);
     }
+
+    Serial.println(">>> Sleep for 30 seconds.");
+    delay(30000);
+
 
 //if((char)tcpBuffer[0]=='1') Serial.println("active game!");
 //    else if((char)tcpBuffer[0]=='0') Serial.println("upcoming game.");
