@@ -55,13 +55,13 @@ def today(league):
             })
     except Exception, e:
         print e
-    print games
+    #print games
     return games
 
 def generateReport():
     report=None
     for index,game in enumerate(today('NHL')):
-
+        print game
     #for game in today('NHL'):
         if game['home'] == focusTeam or game['away'] == focusTeam:
             if game['status'] == 'In-Progress': #active focusteam games in list
