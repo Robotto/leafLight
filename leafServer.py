@@ -55,7 +55,7 @@ def today(league):
             })
     except Exception, e:
         print e
-    #print games
+    print games
     return games
 
 def generateReport():
@@ -65,7 +65,7 @@ def generateReport():
     #for game in today('NHL'):
         if game['home'] == focusTeam or game['away'] == focusTeam:
             if game['status'] == 'In-Progress': #active focusteam games in list
-                report = '1' + '#' + game['home'] + '#' + game['away'] + '#' + str(game['home-score']) + '#' + str(game['away-score']) + '#' + game['clock-section'] + '#' + '\r'
+                report = '1' + '#' + game['home'] + '#' + game['away'] + '#' + str(game['home-score']) + '#' + str(game['away-score']) + '#' + str(game['clock-section']) + '#' + '\r'
                 #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
             elif game['status'] == 'Pre-Game': #no active focusteam game in list
                 report = '0' + '#' + game['home'] + '#' + game['away'] + '#' + str(datetime.datetime.fromtimestamp(game['start'])) + '#' + '\r'
