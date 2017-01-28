@@ -19,12 +19,14 @@ url = 'http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=tru
 focusTeam = 'Maple Leafs' #this program focuses on one specific team.
 #focusTeam = 'Blackhawks'
 
-def today(league):
-    yyyymmdd = int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
+def today(league,dt):
+    #yyyymmdd = int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
+    tomorrow = datetime.datetime.strptime(str(dt), '%Y%m%d').date() + datetime.timedelta(days=1)
+    tomorrow_yyyymmdd = int(tomorrow.strftime("%Y%m%d"))
     games = []
 
     try:
-        f = urllib2.urlopen(url % (league, yyyymmdd))
+        f = urllib2.urlopen(url % (league, dt))
         jsonp = f.read()
         f.close()
         json_str = jsonp.replace('shsMSNBCTicker.loadGamesData(', '').replace(');', '')
@@ -39,7 +41,7 @@ def today(league):
             away = visiting_tree.get('nickname')
             os.environ['TZ'] = 'US/Eastern'
             start = int(
-                time.mktime(time.strptime('%s %d' % (gamestate_tree.get('gametime'), yyyymmdd), '%I:%M %p %Y%m%d')))
+                time.mktime(time.strptime('%s %d' % (gamestate_tree.get('gametime'), dt), '%I:%M %p %Y%m%d')))
             del os.environ['TZ']
 
             games.append({
@@ -55,14 +57,19 @@ def today(league):
             })
     except Exception, e:
         print e
+    if not games:
+        print dt,': no games'
+        return today(league,tomorrow_yyyymmdd)
     #print games
     return games
 
 def generateReport():
+    yyyymmdd=int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
     report=None
     print '>>> DEBUG:'
-    for index,game in enumerate(today('NHL')):
-        print index, ':', game
+    for index,game in enumerate(today('NHL',yyyymmdd)):
+        if game!=None:
+            print index, ':', game
     #for game in today('NHL'):
         if game['home'] == focusTeam or game['away'] == focusTeam:
             if game['status'] == 'In-Progress': #active focusteam games in list
@@ -84,13 +91,13 @@ if __name__ == "__main__":
     print time.ctime(), "startup!"
 
     TCP_IP = '5.79.74.16'
+    #TCP_IP = '192.168.0.110'
     #TCP_IP = '127.0.0.1'
     TCP_PORT = 9999
     BUFFER_SIZE = 128  # Normally 1024, but we want fast response
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,
-                 1)  # make socket reuseable, for debugging (enables you to rerun the program before the socket has timed out)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)  # make socket reuseable, for debugging (enables you to rerun the program before the socket has timed out)
     s.bind((TCP_IP, TCP_PORT))
     s.listen(1)
 
