@@ -90,9 +90,9 @@ if __name__ == "__main__":
 
     print time.ctime(), "startup!"
 
-    #TCP_IP = '5.79.74.16'
+    TCP_IP = '5.79.74.16'
     #TCP_IP = '192.168.0.110'
-    TCP_IP = '127.0.0.1'
+    #TCP_IP = '127.0.0.1'
     TCP_PORT = 9999
     BUFFER_SIZE = 128  # Normally 1024, but we want fast response
 
