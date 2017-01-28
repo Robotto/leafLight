@@ -76,6 +76,7 @@ def generateReport():
         if report!=None:
             print 'Matched ' + focusTeam + ' @ game number ' + str(index) #+ ': ' + str(game)
             return report
+    print '>>> no games in set.'
     return 'e' + '\r'
 
 if __name__ == "__main__":
