@@ -36,8 +36,8 @@ const char* host = "sardukar.moore.dk"; // fx ddlab.dk
 //String url = "test"; //fx: detDerKommerEfterSkråstregen i ddlab.dk/test
 
 //WiFi informationer
-const char* ssid     = "robottoAP";
-const char* password = "dillerdiller";
+const char* ssid     = "bacon13sprut37ninja";
+const char* password = "120010653817HeSt1804020311";
 
 int blinkPin = D6;
 
@@ -58,13 +58,12 @@ void setup() {
 
   drawLeaf();
 
+  digitalWrite(blinkPin, HIGH);
   delay(1500);
-
-display.clear();
+  digitalWrite(blinkPin, LOW);
   
-display.display();
-
-    
+  display.clear();
+  display.display();
 
   wifiConnect();
 }
@@ -92,18 +91,6 @@ void wifiConnect() {
   String ipString=String(WiFi.localIP()[0]) + "." + String(WiFi.localIP()[1]) + "." + String(WiFi.localIP()[2]) + "." + String(WiFi.localIP()[3]);
   display.drawString(0,30, ipString);
   display.display();
-}
-
-void drawFontFaceDemo() {
-    // Font Demo1
-    // create more fonts at http://oleddisplay.squix.ch/
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_10);
-    display.drawString(0, 0, "Hello world");
-    display.setFont(ArialMT_Plain_16);
-    display.drawString(0, 10, "Hello world");
-    display.setFont(ArialMT_Plain_24);
-    display.drawString(0, 26, "Hello world");
 }
 
 
@@ -178,81 +165,12 @@ const int httpPort = 9999;
     }
 
    
-    Serial.print("Home Team: "); Serial.println(homeTeam);
-    Serial.print("Away Team: "); Serial.println(awayTeam);
-
-    if(activeGame){
-
-        Serial.print("Home Score: "); Serial.println(homeScore);
-        Serial.print("Away Score: "); Serial.println(awayScore);
-        Serial.print("@: "); Serial.println(gameTime);
-        
-        //print active game screen
-        display.clear();
-        display.setTextAlignment(TEXT_ALIGN_CENTER);
-
-        display.setFont(Roboto_36);
-        
-        if(scoreByHome) display.setFont(Roboto_Bold_36);
-        display.drawString(20, 2, homeScore);
-        if(scoreByAway) display.setFont(Roboto_Bold_36);
-        display.drawString(110, 2, awayScore);
-
-        display.setFont(ArialMT_Plain_10);
-        display.drawString(64, 32, gameTime);        
-        display.drawString(64, 48, "VS");        
-
-        display.setFont(ArialMT_Plain_10);
-        display.setTextAlignment(TEXT_ALIGN_LEFT);
-        display.drawString(0, 48, homeTeam);        
-        display.setTextAlignment(TEXT_ALIGN_RIGHT);
-        display.drawString(128, 48, awayTeam);        
-        display.display();        
-
-        if(scoreByAway || scoreByHome) { 
-          digitalWrite(blinkPin, HIGH); 
-          delay(5000); 
-          digitalWrite(blinkPin, LOW);
-          scoreByHome=false;
-          scoreByAway=false;
-        }
-
-
-    /*display.setFont(ArialMT_Plain_16);
-    display.drawString(0, 10, "Hello world");
-    display.setFont(ArialMT_Plain_24);
-    display.drawString(0, 26, "Hello world");*/
-
-        //handle score bools
-
-      }
-    else{
-        Serial.print("Game starts at: "); Serial.println(gameStart);
-
-        //print upcoming game info
-        display.clear();
-        display.setTextAlignment(TEXT_ALIGN_CENTER);        
-        display.setFont(ArialMT_Plain_16);
-        display.drawString(64, 0, "Next game @ :");        
-        display.drawString(64, 48, "VS");        
-
-        display.setFont(ArialMT_Plain_10);
-        display.drawString(64, 20, gameStart);        
-
-        display.setTextAlignment(TEXT_ALIGN_LEFT);
-        display.drawString(0, 36, homeTeam);        
-        display.setTextAlignment(TEXT_ALIGN_RIGHT);
-        display.drawString(128, 36, awayTeam);        
-        display.display();    
-        
-
-      }
    
 
 
     Serial.println(">>> Sleep for 5 minutes.");
-    //delay(5*60*1000);
-    delay(15000);
+    delay(5*60*1000);
+    //delay(15000);
 
 //if((char)tcpBuffer[0]=='1') Serial.println("active game!");
 //    else if((char)tcpBuffer[0]=='0') Serial.println("upcoming game.");
@@ -318,6 +236,67 @@ void parseLine(String line)
 
     homeTeam = line.substring(2,pound2);
     awayTeam = line.substring(pound2+1,pound3);
+
+    Serial.print("Home Team: "); Serial.println(homeTeam);
+    Serial.print("Away Team: "); Serial.println(awayTeam);
+
+    if(activeGame){
+
+        Serial.print("Home Score: "); Serial.println(homeScore);
+        Serial.print("Away Score: "); Serial.println(awayScore);
+        Serial.print("@: "); Serial.println(gameTime);
+        
+        //print active game screen
+        display.clear();
+        display.setTextAlignment(TEXT_ALIGN_CENTER);
+
+        display.setFont(Roboto_36);
+        
+        if(scoreByHome) display.setFont(Roboto_Bold_36);
+        display.drawString(20, 2, homeScore);
+        if(scoreByAway) display.setFont(Roboto_Bold_36);
+        display.drawString(110, 2, awayScore);
+
+        display.setFont(ArialMT_Plain_10);
+        display.drawString(64, 32, gameTime);        
+        display.drawString(64, 48, "VS");        
+
+        display.setFont(ArialMT_Plain_10);
+        display.setTextAlignment(TEXT_ALIGN_LEFT);
+        display.drawString(0, 48, homeTeam);        
+        display.setTextAlignment(TEXT_ALIGN_RIGHT);
+        display.drawString(128, 48, awayTeam);        
+        display.display();        
+
+        if(scoreByAway || scoreByHome) { 
+          digitalWrite(blinkPin, HIGH); 
+          delay(5000); 
+          digitalWrite(blinkPin, LOW);
+          scoreByHome=false;
+          scoreByAway=false;
+        }
+      }
+    else{
+        Serial.print("Game starts at: "); Serial.println(gameStart);
+
+        //print upcoming game info
+        display.clear();
+        display.setTextAlignment(TEXT_ALIGN_CENTER);        
+        display.setFont(ArialMT_Plain_16);
+        display.drawString(64, 0, "Next game @ :");        
+        display.drawString(64, 48, "VS");        
+
+        display.setFont(ArialMT_Plain_10);
+        display.drawString(64, 20, gameStart);        
+
+        display.setTextAlignment(TEXT_ALIGN_LEFT);
+        display.drawString(0, 36, homeTeam);        
+        display.setTextAlignment(TEXT_ALIGN_RIGHT);
+        display.drawString(128, 36, awayTeam);        
+        display.display();    
+        
+
+      }
 
     
 
