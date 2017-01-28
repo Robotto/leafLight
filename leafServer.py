@@ -20,13 +20,13 @@ focusTeam = 'Maple Leafs' #this program focuses on one specific team.
 #focusTeam = 'Blackhawks'
 
 def today(league,dt):
-    #yyyymmdd = int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
-    tomorrow = datetime.datetime.strptime(str(dt), '%Y%m%d').date() + datetime.timedelta(days=1)
-    tomorrow_yyyymmdd = int(tomorrow.strftime("%Y%m%d"))
+
+    yyyymmdd = int(dt.strftime("%Y%m%d"))
+
     games = []
 
     try:
-        f = urllib2.urlopen(url % (league, dt))
+        f = urllib2.urlopen(url % (league, yyyymmdd))
         jsonp = f.read()
         f.close()
         json_str = jsonp.replace('shsMSNBCTicker.loadGamesData(', '').replace(');', '')
@@ -41,7 +41,7 @@ def today(league,dt):
             away = visiting_tree.get('nickname')
             os.environ['TZ'] = 'US/Eastern'
             start = int(
-                time.mktime(time.strptime('%s %d' % (gamestate_tree.get('gametime'), dt), '%I:%M %p %Y%m%d')))
+                time.mktime(time.strptime('%s %d' % (gamestate_tree.get('gametime'), yyyymmdd), '%I:%M %p %Y%m%d')))
             del os.environ['TZ']
 
             games.append({
@@ -58,16 +58,16 @@ def today(league,dt):
     except Exception, e:
         print e
     if not games:
-        print dt,': no games'
-        return today(league,tomorrow_yyyymmdd)
+        print dt.date(),': no games'
+        return today(league,dt + datetime.timedelta(days=1)) #recursive call with date incremented
     #print games
     return games
 
 def generateReport():
-    yyyymmdd=int(datetime.datetime.now(pytz.timezone('US/Pacific')).strftime("%Y%m%d"))
+    dt=datetime.datetime.now(pytz.timezone('US/Pacific'))
     report=None
     print '>>> DEBUG:'
-    for index,game in enumerate(today('NHL',yyyymmdd)):
+    for index,game in enumerate(today('NHL',dt)):
         if game!=None:
             print index, ':', game
     #for game in today('NHL'):
@@ -90,9 +90,9 @@ if __name__ == "__main__":
 
     print time.ctime(), "startup!"
 
-    TCP_IP = '5.79.74.16'
+    #TCP_IP = '5.79.74.16'
     #TCP_IP = '192.168.0.110'
-    #TCP_IP = '127.0.0.1'
+    TCP_IP = '127.0.0.1'
     TCP_PORT = 9999
     BUFFER_SIZE = 128  # Normally 1024, but we want fast response
 
