@@ -36,8 +36,8 @@ const char* host = "sardukar.moore.dk"; // fx ddlab.dk
 //String url = "test"; //fx: detDerKommerEfterSkråstregen i ddlab.dk/test
 
 //WiFi informationer
-const char* ssid     = "bacon13sprut37ninja";
-const char* password = "120010653817HeSt1804020311";
+const char* ssid     = "no";
+const char* password = "redact";
 
 int blinkPin = D6;
 
@@ -168,8 +168,8 @@ const int httpPort = 9999;
    
 
 
-    Serial.println(">>> Sleep for 5 minutes.");
-    delay(5*60*1000);
+    Serial.println(">>> Sleep for 2 minutes.");
+    delay(2*60*1000);
     //delay(15000);
 
 //if((char)tcpBuffer[0]=='1') Serial.println("active game!");
