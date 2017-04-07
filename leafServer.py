@@ -57,8 +57,19 @@ def today(league,dt):
             })
     except Exception, e:
         print e
+
+
     if not games:
         print dt.date(),': no games'
+
+        #TODO: check recursion depth before going deeper.
+        # print 'dt:', dt
+        # print 'now:', datetime.datetime.now(pytz.timezone('US/Pacific'))
+        # print 'timedelta:', (dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days
+        recursionCount=(dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days
+        print 'currently checking' , recursionCount , 'days in the future'
+        if recursionCount>28:
+            return [] #will this fail?
         return today(league,dt + datetime.timedelta(days=1)) #recursive call with date incremented
     #print games
     return games
@@ -67,22 +78,26 @@ def generateReport():
     dt=datetime.datetime.now(pytz.timezone('US/Pacific'))
     report=None
     print '>>> DEBUG:'
-    for index,game in enumerate(today('NHL',dt)):
-        if game!=None:
-            print index, ':', game
-    #for game in today('NHL'):
-        if game['home'] == focusTeam or game['away'] == focusTeam:
-            if game['status'] == 'In-Progress': #active focusteam games in list
-                report = '1' + '#' + game['home'] + '#' + game['away'] + '#' + str(game['home-score']) + '#' + str(game['away-score']) + '#' + str(game['clock-section']) + '#' + '\r'
-                #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
-            elif game['status'] == 'Pre-Game': #no active focusteam game in list
-                report = '0' + '#' + game['home'] + '#' + game['away'] + '#' + str(datetime.datetime.fromtimestamp(game['start'])) + '#' + '\r'
-                #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
-                #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
-        
-        if report!=None:
-            print 'Matched ' + focusTeam + ' @ game number ' + str(index) #+ ': ' + str(game)
-            return report
+    try:
+        for index,game in enumerate(today('NHL',dt)):
+            if game!=None:
+                print index, ':', game
+        #for game in today('NHL'):
+            if game['home'] == focusTeam or game['away'] == focusTeam:
+                if game['status'] == 'In-Progress': #active focusteam games in list
+                    report = '1' + '#' + game['home'] + '#' + game['away'] + '#' + str(game['home-score']) + '#' + str(game['away-score']) + '#' + str(game['clock-section']) + '#' + '\r'
+                    #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
+                elif game['status'] == 'Pre-Game': #no active focusteam game in list
+                    report = '0' + '#' + game['home'] + '#' + game['away'] + '#' + str(datetime.datetime.fromtimestamp(game['start'])) + '#' + '\r'
+                    #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
+                    #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
+
+            if report!=None:
+                print 'Matched ' + focusTeam + ' @ game number ' + str(index) #+ ': ' + str(game)
+                return report
+    except Exception as e:
+        print '>>> error in generation of report.. (empty data set?)' , str(e)
+        pass
     print '>>> no games in set.'
     return 'e' + '\r'
 
