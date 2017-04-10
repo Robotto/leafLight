@@ -62,13 +62,14 @@ def today(league,dt):
     if not games:
         print dt.date(),': no games'
 
-        #TODO: check recursion depth before going deeper.
+
         # print 'dt:', dt
         # print 'now:', datetime.datetime.now(pytz.timezone('US/Pacific'))
         # print 'timedelta:', (dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days
-        recursionCount=(dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days
+        recursionCount=(dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days+1
         print 'currently checking' , recursionCount , 'days in the future'
         if recursionCount>28:
+            print 'Hit recursion limit. Returning empty set.'
             return [] #will this fail?
         return today(league,dt + datetime.timedelta(days=1)) #recursive call with date incremented
     #print games
