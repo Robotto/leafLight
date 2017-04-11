@@ -99,7 +99,7 @@ def generateReport():
     except Exception as e:
         print '>>> error in generation of report.. (empty data set?)' , str(e)
         pass
-    print '>>> no games in set.'
+    print '>>> no games with', focusTeam, 'in set.'
     return 'e' + '\r'
 
 if __name__ == "__main__":
