@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pytz
 import datetime
 import time
@@ -47,7 +48,7 @@ def today(league):
             })
     except Exception, e:
         print e
-
+    
     return games
 
 
