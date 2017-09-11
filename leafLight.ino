@@ -3,10 +3,24 @@
 
 
 #include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
-#include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
+//#include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
+#include "SSD1306Wire.h"
+
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
+
+//CREATE MORE FONTS AT: http://oleddisplay.squix.ch/
+//FONT LIST:
+//		Found in standard fonts file in library
+//ArialMT_Plain_10 
+//ArialMT_Plain_16
+//		Included below:
+//Roboto_Bold_36
+//Roboto_36
+#include "Roboto_36.h"
 
 // Include custom images
 #include "leafs.h"
+
 
 // Initialize the OLED display using SPI
 // D5 -> CLK
@@ -26,7 +40,7 @@
 // SH1106Brzo  display(0x3c, D3, D5);
 
 // Initialize the OLED display using Wire library
-SSD1306  display(0x3c, D2, D1);
+SSD1306Wire  display(0x3c, D2, D1);
  //SSD1306  display(0x3c, 3, 2);
 // SH1106 display(0x3c, D3, D5);
 
@@ -36,10 +50,29 @@ const char* host = "sardukar.moore.dk"; // fx ddlab.dk
 //String url = "test"; //fx: detDerKommerEfterSkråstregen i ddlab.dk/test
 
 //WiFi informationer
-const char* ssid     = "no";
-const char* password = "redact";
+//const char* ssid     = "If it bleeds we can kill it!";
+//const char* password = "***REMOVED***";
 
 int blinkPin = D6;
+
+void configModeCallback (WiFiManager *myWiFiManager) {
+  Serial.println("Entered config mode");
+  Serial.println(WiFi.softAPIP());
+  //if you used auto generated SSID, print it
+  Serial.println(myWiFiManager->getConfigPortalSSID());
+
+  display.clear();
+  display.display();
+  display.drawString(0, 10, "Connection failed");
+  display.drawString(0, 20, "Creating accesspoint: ");
+  display.drawString(0, 30, myWiFiManager->getConfigPortalSSID());
+  display.drawString(0, 40, String(WiFi.softAPIP()));
+
+  display.display();
+
+  //ticker.attach_ms(5,fade);
+}
+
 
 void setup() {
   WiFi.hostname("LeafLight");
@@ -53,7 +86,7 @@ void setup() {
   display.init();
 
   display.flipScreenVertically();
-  display.setFont(ArialMT_Plain_10);
+  display.setFont(ArialMT_Plain_10); //CREATE MORE FONTS AT: http://oleddisplay.squix.ch/
 
 
   drawLeaf();
@@ -65,9 +98,54 @@ void setup() {
   display.clear();
   display.display();
 
-  wifiConnect();
+//WiFiManager
+  //Local intialization. Once its business is done, there is no need to keep it around
+  WiFiManager wifiManager;
+  //reset settings - for testing
+  //wifiManager.resetSettings();
+
+  display.drawString(0, 10, "Connecting to wifi..");
+  
+  display.display();
+
+  //set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
+  wifiManager.setAPCallback(configModeCallback);
+
+  wifiManager.setConnectTimeout(60); //try to connect to known wifis for a long time before defaulting to AP mode
+
+  //fetches ssid and pass and tries to connect
+  //if it does not connect it starts an access point with the specified name
+  //here  "leaflight"
+  //and goes into a blocking loop awaiting configuration
+  if (!wifiManager.autoConnect("leafLight")) {
+    Serial.println("failed to connect and hit timeout");
+    //reset and try again, or maybe put it to deep sleep
+    alarm();
+
+  }
+
+
+  //wifiConnect();
 }
 
+void alarm()
+{
+
+
+  display.clear();
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(0, 10, "wifi config failed.");
+  display.drawString(0, 20, "Please reboot.");
+  display.display();
+
+
+	while(1){
+		digitalWrite(blinkPin, HIGH);
+ 		delay(1000);
+  		digitalWrite(blinkPin, LOW);
+	}
+}
+/*
 void wifiConnect() {
   // We start by connecting to a WiFi network
   display.drawString(0, 10, "Connecting to:");
@@ -92,7 +170,7 @@ void wifiConnect() {
   display.drawString(0,30, ipString);
   display.display();
 }
-
+*/
 
 void drawLeaf() {
     display.clear();
@@ -250,7 +328,7 @@ void parseLine(String line)
         display.clear();
         display.setTextAlignment(TEXT_ALIGN_CENTER);
 
-        display.setFont(Roboto_36);
+        display.setFont(Roboto_36); //CREATE MORE FONTS AT: http://oleddisplay.squix.ch/
         
         if(scoreByHome) display.setFont(Roboto_Bold_36);
         display.drawString(20, 2, homeScore);
