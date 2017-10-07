@@ -51,7 +51,7 @@ const char* host = "sardukar.moore.dk"; // fx ddlab.dk
 
 //WiFi informationer
 //const char* ssid     = "If it bleeds we can kill it!";
-//const char* password = "IamthegummybearofcandycornIa89";
+//const char* password = "redact";
 
 int blinkPin = D6;
 
