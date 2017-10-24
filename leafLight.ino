@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
+#include <ArduinoOTA.h>
 
 #include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
 //#include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
@@ -51,7 +52,7 @@ const char* host = "sardukar.moore.dk"; // fx ddlab.dk
 
 //WiFi informationer
 //const char* ssid     = "If it bleeds we can kill it!";
-//const char* password = "IamthegummybearofcandycornIa89";
+//const char* password = "redact";
 
 int blinkPin = D6;
 
@@ -63,15 +64,16 @@ void configModeCallback (WiFiManager *myWiFiManager) {
 
   display.clear();
   display.display();
-  display.drawString(0, 10, "Connection failed");
+  display.drawString(0, 10, "Unknown networks only");
   display.drawString(0, 20, "Creating accesspoint: ");
   display.drawString(0, 30, myWiFiManager->getConfigPortalSSID());
-  display.drawString(0, 40, String(WiFi.softAPIP()));
+  display.drawString(0, 40, WiFi.softAPIP().toString());
 
   display.display();
 
   //ticker.attach_ms(5,fade);
 }
+
 
 
 void setup() {
@@ -95,6 +97,58 @@ void setup() {
   delay(1500);
   digitalWrite(blinkPin, LOW);
   
+
+  //OTA:
+  // Port defaults to 8266
+  // ArduinoOTA.setPort(8266);
+  // Hostname defaults to esp8266-[ChipID]
+  ArduinoOTA.setHostname("LeafLight");
+  
+  // No authentication by default
+  ArduinoOTA.setPassword((const char *)"1804020311");
+  //ArduinoOTA.setPasswordHash((const char *)"77ca9ed101ac99e43b6842c169c20fda");
+
+  ArduinoOTA.onStart([]() {
+  	display.clear();
+    display.drawString(0,10,"OTA Start");
+    display.display();    
+    delay(500);
+  });
+
+  ArduinoOTA.onEnd([]() {
+  	display.clear();
+    display.drawString(0,10,"OTA End.. brace for reset");
+    display.display();
+  	ESP.restart();
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    //Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    display.clear();
+    display.drawString(0,10,String("OTA Progress: ") + String(progress / (total / 100)) + String("%"));
+    display.display();
+  });
+
+  ArduinoOTA.onError([](ota_error_t error) {
+    display.clear();
+    String buffer=String("Error[") + String(error) + String("]: ");
+
+    if (error == OTA_AUTH_ERROR) buffer+=String("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) buffer+=String("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) buffer+=String("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) buffer+=String("Receive Failed");
+    else if (error == OTA_END_ERROR) buffer+=String("End Failed");
+    
+    display.drawString(0, 10, buffer);
+    display.display();
+    
+  });
+
+  ArduinoOTA.begin();
+
+
+
+
   display.clear();
   display.display();
 
@@ -111,7 +165,7 @@ void setup() {
   //set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
   wifiManager.setAPCallback(configModeCallback);
 
-  wifiManager.setConnectTimeout(60); //try to connect to known wifis for a long time before defaulting to AP mode
+  wifiManager.setConnectTimeout(30); //try to connect to known wifis for a long time before defaulting to AP mode
 
   //fetches ssid and pass and tries to connect
   //if it does not connect it starts an access point with the specified name
