@@ -47,8 +47,7 @@ SSD1306Wire  display(0x3c, D2, D1);
 
 
 //URL informationer
-const char* host = "sardukar.moore.dk"; // fx ddlab.dk
-//String url = "test"; //fx: detDerKommerEfterSkråstregen i ddlab.dk/test
+const char* host = "sardukar.moore.dk"; //
 
 //WiFi informationer
 //const char* ssid     = "If it bleeds we can kill it!";
@@ -70,7 +69,7 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   display.drawString(0, 40, WiFi.softAPIP().toString());
 
   display.display();
-
+  
   //ticker.attach_ms(5,fade);
 }
 
@@ -104,9 +103,6 @@ void setup() {
   // Hostname defaults to esp8266-[ChipID]
   ArduinoOTA.setHostname("LeafLight");
   
-  // No authentication by default
-  ArduinoOTA.setPassword((const char *)"1804020311");
-  //ArduinoOTA.setPasswordHash((const char *)"77ca9ed101ac99e43b6842c169c20fda");
 
   ArduinoOTA.onStart([]() {
   	display.clear();
@@ -199,32 +195,6 @@ void alarm()
   		digitalWrite(blinkPin, LOW);
 	}
 }
-/*
-void wifiConnect() {
-  // We start by connecting to a WiFi network
-  display.drawString(0, 10, "Connecting to:");
-  display.drawString(0, 20, ssid);
-
-  display.display();
-
-  WiFi.begin(ssid, password);
-
-  int dotCounter=0;
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    display.drawString(0+dotCounter*4,30,".");
-    dotCounter++;
-    display.display();
-  }
-
-  display.clear();
-  display.drawString(0,10,"WiFi connected!");
-  display.drawString(0,20,"IP address:");
-  String ipString=String(WiFi.localIP()[0]) + "." + String(WiFi.localIP()[1]) + "." + String(WiFi.localIP()[2]) + "." + String(WiFi.localIP()[3]);
-  display.drawString(0,30, ipString);
-  display.display();
-}
-*/
 
 void drawLeaf() {
     display.clear();
