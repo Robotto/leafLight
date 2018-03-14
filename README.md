@@ -1,5 +1,5 @@
 # leafLight
-![The leaflight waiting patiently for the next maple leafs game](https://raw.githubusercontent.com/Robotto/leafLight/blob/master/leafLight.jpg)
+![The leaflight waiting patiently for the next maple leafs game](leafLight.jpg)
 
 A lamp that does a thing when the Toronto Maple Leafs do a thing... 
 
