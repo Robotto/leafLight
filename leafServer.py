@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#copied from here: https://gist.github.com/criccomini/3805436#file-gistfile1-py via https://riccomini.name/streaming-live-sports-schedule-scores-stats-api
+
 import pytz
 import datetime
 import time
