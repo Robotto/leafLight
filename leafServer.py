@@ -13,8 +13,11 @@ from IPy import IP
 # import elementtree.ElementTree as ET
 import xml.etree.ElementTree as ET
 
-# e.g. http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=MLB&period=20120929
-url = 'http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=%s&period=%d'
+# Old: http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=MLB&period=20120929
+
+#New: http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=NHL&period=20190828&random=1567023796177
+
+url = 'http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=%s&period=%d&random=%d'
 
 focusTeam = 'Maple Leafs' #this program focuses on one specific team.
 #focusTeam = 'Blackhawks'
@@ -22,15 +25,18 @@ focusTeam = 'Maple Leafs' #this program focuses on one specific team.
 def today(league,dt):
 
     yyyymmdd = int(dt.strftime("%Y%m%d"))
+    timestamp = int(round(time.time() * 1000))
+
+    print timestamp
 
     games = []
 
     try:
-        f = urllib2.urlopen(url % (league, yyyymmdd))
+        f = urllib2.urlopen(url % (league, yyyymmdd,timestamp))
         jsonp = f.read()
         f.close()
         json_str = jsonp.replace('shsMSNBCTicker.loadGamesData(', '').replace(');', '')
-        # print json_str
+        print json_str
         json_parsed = json.loads(json_str)
         for game_str in json_parsed.get('games', []):
             game_tree = ET.XML(game_str)
@@ -106,9 +112,9 @@ if __name__ == "__main__":
 
     print time.ctime(), "startup!"
 
-    TCP_IP = '5.79.74.16'
+    #TCP_IP = '5.79.74.16'
     #TCP_IP = '192.168.0.110'
-    #TCP_IP = '127.0.0.1'
+    TCP_IP = '127.0.0.1'
     TCP_PORT = 9999
     BUFFER_SIZE = 128  # Normally 1024, but we want fast response
 
