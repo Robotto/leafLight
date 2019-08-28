@@ -29,7 +29,7 @@ def today(league,dt):
     yyyymmdd = int(dt.strftime("%Y%m%d"))
     timestamp = int(round(time.time() * 1000))
 
-    print timestamp
+    #print timestamp
 
     games = []
 
@@ -38,7 +38,7 @@ def today(league,dt):
         jsonp = f.read()
         f.close()
         json_str = jsonp.replace('shsMSNBCTicker.loadGamesData(', '').replace(');', '')
-        print json_str
+        #print json_str
         json_parsed = json.loads(json_str)
         for game_str in json_parsed.get('games', []):
             game_tree = ET.XML(game_str)
