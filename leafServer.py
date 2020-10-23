@@ -19,6 +19,9 @@ import xml.etree.ElementTree as ET
 
 #New: http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=NHL&period=20190828&random=1567023796177
 
+#here's a curl for testing:
+#curl "http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=NHL&period=20190828&random=$(date +%s)000" -vvv
+
 url = 'http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=%s&period=%d&random=%d'
 
 focusTeam = 'Maple Leafs' #this program focuses on one specific team.
