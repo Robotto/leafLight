@@ -78,7 +78,7 @@ def today(league,dt):
         # print 'now:', datetime.datetime.now(pytz.timezone('US/Pacific'))
         # print 'timedelta:', (dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days
         recursionCount=(dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days+1
-        print(f'Currently checking {recursionCount} days in the future')
+        print(f"Currently checking {recursionCount} days in the future")
         if recursionCount>28:
             print('Hit recursion limit. Returning empty set.')
             return [] #will this fail?
@@ -95,17 +95,12 @@ def generateReport():
         for index,game in enumerate(rawList):
             if game!=None:
                 print(f'{index}:{game}')
-            elif game["home"] == focusTeam or game["away"] == focusTeam:
-                print('\nMATCH!\n')
-                if game["status"] == 'In-Progress': #active focusteam games in list
-                    #report = '1' + '#' + game['home'] + '#' + game['away'] + '#' + str(game['home-score']) + '#' + str(game['away-score']) + '#' + str(game['clock-section']) + '#' + '\r'
-                    report = f'1#{game["home"]}#{game["away"]}#{game["home-score"]}#{game["away-score"]}#{game["clock-section"]}#\r'
-                    #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
-                elif game["status"] == "Pre-Game": #no active focusteam game in list
-                    #report = '0' + '#' + game['home'] + '#' + game['away'] + '#' + str(datetime.datetime.fromtimestamp(game['start'])) + '#' + '\r'
-                    report = f'0#{game["home"]}#{game["away"]}#{datetime.datetime.fromtimestamp(game["start"])}#\r'
-                    #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
-                    #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
+                if game["home"] == focusTeam or game["away"] == focusTeam:
+                    print('\nMATCH!\n')
+                    if game["status"] == 'In-Progress': #active focusteam games in list
+                        report = f'1#{game["home"]}#{game["away"]}#{game["home-score"]}#{game["away-score"]}#{game["clock-section"]}#\r'
+                    elif game["status"] == "Pre-Game": #no active focusteam game in list
+                        report = f'0#{game["home"]}#{game["away"]}#{datetime.datetime.fromtimestamp(game["start"])}#\r'
 
             if report!=None:
                 print(f'Matched {focusTeam} @ game number {index}')#: {game}')
