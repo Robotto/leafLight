@@ -2,6 +2,7 @@
 
 #copied from here: https://gist.github.com/criccomini/3805436#file-gistfile1-py via https://riccomini.name/streaming-live-sports-schedule-scores-stats-api
 
+from dateutil import tz
 import pytz
 import datetime
 import time
@@ -10,6 +11,7 @@ import json
 import os
 import socket
 from IPy import IP
+
 
 
 # import elementtree.ElementTree as ET
@@ -23,9 +25,6 @@ import xml.etree.ElementTree as ET
 #curl "http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=NHL&period=20190828&random=$(date +%s)000" -vvv
 
 url = 'http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=%s&period=%d&random=%d'
-
-focusTeam = 'Maple Leafs' #this program focuses on one specific team.
-#focusTeam = 'Blackhawks'
 
 def today(league,dt):
 
@@ -50,7 +49,7 @@ def today(league,dt):
         gamestate_tree = game_tree.find('gamestate')
         home = home_tree.get('nickname')
         away = visiting_tree.get('nickname')
-        os.environ['TZ'] = 'US/Eastern'
+        os.environ['TZ'] = 'US/Eastern' # OH MY GOD!
         start = int(
             time.mktime(time.strptime('%s %d' % (gamestate_tree.get('gametime'), yyyymmdd), '%I:%M %p %Y%m%d')))
         del os.environ['TZ']
@@ -73,11 +72,9 @@ def today(league,dt):
     if not games:
         print(dt.date(),': no games')
 
+#        recursionCount=(dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days+1
+        recursionCount=(dt - datetime.datetime.now(tz.gettz('US/Pacific'))).days+1
 
-        # print 'dt:', dt
-        # print 'now:', datetime.datetime.now(pytz.timezone('US/Pacific'))
-        # print 'timedelta:', (dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days
-        recursionCount=(dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days+1
         print(f"Currently checking {recursionCount} days in the future")
         if recursionCount>28:
             print('Hit recursion limit. Returning empty set.')
@@ -86,8 +83,9 @@ def today(league,dt):
     #print games
     return games
 
-def generateReport():
-    dt=datetime.datetime.now(pytz.timezone('US/Pacific'))
+def generateReport(focusTeam,localTimeZone):
+    #dt=datetime.datetime.now(pytz.timezone('US/Pacific'))
+    dt=datetime.datetime.now(tz.gettz('US/Pacific'))
     report = None
     rawList = today('NHL',dt)
     #print(f'>>> DEBUG: {rawList}')
@@ -100,7 +98,7 @@ def generateReport():
                     if game["status"] == 'In-Progress': #active focusteam games in list
                         report = f'1#{game["home"]}#{game["away"]}#{game["home-score"]}#{game["away-score"]}#{game["clock-section"]}#\r'
                     elif game["status"] == "Pre-Game": #no active focusteam game in list
-                        report = f'0#{game["home"]}#{game["away"]}#{datetime.datetime.fromtimestamp(game["start"])}#\r'
+                        report = f'0#{game["home"]}#{game["away"]}#{datetime.datetime.fromtimestamp(game["start"],tz=tz.gettz(localTimeZone))}#\r'
 
             if report!=None:
                 print(f'Matched {focusTeam} @ game number {index}')#: {game}')
@@ -141,8 +139,8 @@ if __name__ == "__main__":
 
             #            while True:  # looks like connection timeout is ~60 seconds.
 
-            print(f'Getting games. Looking for {focusTeam} games.')
-            report = generateReport()
+            print(f'Looking for Maple Leafs games...')
+            report = generateReport(focusTeam = 'Maple Leafs', localTimeZone='Europe / Berlin')
             conn.send(report.encode('utf-8'))  # +'\n')  # echo
             print(f'TX: {report}')
             print('Closing connection')
