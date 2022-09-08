@@ -40,13 +40,13 @@ def today(league,dt):
     f.close()
     json_str = jsonp.replace("shsMSNBCTicker.loadGamesData(", "").replace(");", "")
     json_parsed = json.loads(json_str)
-    print(json_parsed)
+    #print(json_parsed)
     for game_str in json_parsed.get('games', []):
         game_tree = ET.XML(game_str)
         visiting_tree = game_tree.find('visiting-team')
         home_tree = game_tree.find('home-team')
         gamestate_tree = game_tree.find('gamestate')
-        print(f"Raw clock string in data: {gamestate_tree.get('gametime')}")
+        #print(f"Raw clock string in data: {gamestate_tree.get('gametime')}")
         home = home_tree.get('nickname')
         away = visiting_tree.get('nickname')
 
