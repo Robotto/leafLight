@@ -2,15 +2,12 @@
 
 #copied from here: https://gist.github.com/criccomini/3805436#file-gistfile1-py via https://riccomini.name/streaming-live-sports-schedule-scores-stats-api
 
-from dateutil import tz
-import pytz
+import dateutil.parser, dateutil.tz as tz
 import datetime
 import time
 import urllib.request, urllib.error, urllib.parse
 import json
-import os
 import socket
-from IPy import IP
 
 
 
@@ -36,23 +33,33 @@ def today(league,dt):
     games = []
 
     #try:
-    f = urllib.request.urlopen(url % (league, yyyymmdd,timestamp))
+    urlString = url % (league, yyyymmdd,timestamp)
+    print(f"getting: {urlString} ...")
+    f = urllib.request.urlopen(urlString)
     jsonp = f.read().decode('utf8')
     f.close()
     json_str = jsonp.replace("shsMSNBCTicker.loadGamesData(", "").replace(");", "")
-    #print json_str
     json_parsed = json.loads(json_str)
+    print(json_parsed)
     for game_str in json_parsed.get('games', []):
         game_tree = ET.XML(game_str)
         visiting_tree = game_tree.find('visiting-team')
         home_tree = game_tree.find('home-team')
         gamestate_tree = game_tree.find('gamestate')
+        print(f"Raw clock string in data: {gamestate_tree.get('gametime')}")
         home = home_tree.get('nickname')
         away = visiting_tree.get('nickname')
-        os.environ['TZ'] = 'US/Eastern' # OH MY GOD!
-        start = int(
-            time.mktime(time.strptime('%s %d' % (gamestate_tree.get('gametime'), yyyymmdd), '%I:%M %p %Y%m%d')))
-        del os.environ['TZ']
+
+            #Let's fuck around with some timezone bullshit:
+            #Apparently the API returns time in EST (UTC-5), even if EDT (UTC-4) is active..
+            #somewhere else a dst boolean is set, but i'm gonna rely on tzinfo to get that right.
+
+        timeToParse = f"{gamestate_tree.get('gametime')} {yyyymmdd}"
+        parsedTime = dateutil.parser.parse(timeToParse).replace(tzinfo=tz.gettz('US/Eastern')) #set proper timezone
+        if parsedTime.timetuple().tm_isdst: #Adjust for EST/EDT discrepancy, if DST is active in ET.
+            parsedTime += datetime.timedelta(hours=1)
+        unix = parsedTime.timestamp()
+        start = int(unix)
 
         games.append({
             'league': league,
@@ -73,7 +80,7 @@ def today(league,dt):
         print(dt.date(),': no games')
 
 #        recursionCount=(dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days+1
-        recursionCount=(dt - datetime.datetime.now(tz.gettz('US/Pacific'))).days+1
+        recursionCount=(dt - datetime.datetime.now(dateutil.tz.gettz('US/Pacific'))).days+1
 
         print(f"Currently checking {recursionCount} days in the future")
         if recursionCount>28:
@@ -85,7 +92,8 @@ def today(league,dt):
 
 def generateReport(focusTeam,localTimeZone):
     #dt=datetime.datetime.now(pytz.timezone('US/Pacific'))
-    dt=datetime.datetime.now(tz.gettz('US/Pacific'))
+    dt=datetime.datetime.now(dateutil.tz.gettz('US/Pacific'))
+    print(dt)
     report = None
     rawList = today('NHL',dt)
     #print(f'>>> DEBUG: {rawList}')
