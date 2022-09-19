@@ -5,7 +5,7 @@
 
 #include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
 //#include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
-#include "SSD1306Wire.h"
+#include <SSD1306Wire.h> //https://github.com/ThingPulse/esp8266-oled-ssd1306
 
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
 
