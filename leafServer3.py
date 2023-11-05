@@ -1,112 +1,60 @@
 #!/usr/bin/env python
-
-#copied from here: https://gist.github.com/criccomini/3805436#file-gistfile1-py via https://riccomini.name/streaming-live-sports-schedule-scores-stats-api
-
 import dateutil.parser, dateutil.tz as tz
 import datetime
 import time
-import urllib.request, urllib.error, urllib.parse
-import json
 import socket
+import requests
+import json
+from ticker import Game
 
+def get_JSON(URL):
+    "Request JSON from API server"
+    response = requests.get(URL)
+    # the live.nhle.com/ API has a wrapper, so remove it
+    if 'nhle' in URL:
+        response = response.text.replace('loadScoreboard(', '')
+        response = response.replace(')', '')
+    response = json.loads(response)
+    return response
 
+def getGames():
+    urlString = 'https://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp'
 
-# import elementtree.ElementTree as ET
-import xml.etree.ElementTree as ET
-
-# Old: http://scores.nbcsports.msnbc.com/ticker/data/gamesMSNBC.js.asp?jsonp=true&sport=MLB&period=20120929
-
-#New: http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=NHL&period=20190828&random=1567023796177
-
-#here's a curl for testing:
-#curl "http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=NHL&period=20190828&random=$(date +%s)000" -vvv
-
-url = 'http://scores.nbcsports.com/ticker/data/gamesNEW.js.asp?jsonp=true&sport=%s&period=%d&random=%d'
-
-def today(league,dt):
-
-    yyyymmdd = int(dt.strftime("%Y%m%d"))
-    timestamp = int(round(time.time() * 1000))
-
-    #print timestamp
+    data = get_JSON(urlString)
+    #print(f'Raw data: {data}')
 
     games = []
+    for game_info in data['games']:
+        game = Game(game_info)
+        if game.is_scheduled_for_today() or True: #DEBUG: Append all games, and not just the ones for today
+            games.append(game)
 
-    #try:
-    urlString = url % (league, yyyymmdd,timestamp)
-    print(f"getting: {urlString} ...")
-    f = urllib.request.urlopen(urlString)
-    jsonp = f.read().decode('utf8')
-    f.close()
-    json_str = jsonp.replace("shsMSNBCTicker.loadGamesData(", "").replace(");", "")
-    json_parsed = json.loads(json_str)
-    #print(json_parsed)
-    for game_str in json_parsed.get('games', []):
-        game_tree = ET.XML(game_str)
-        visiting_tree = game_tree.find('visiting-team')
-        home_tree = game_tree.find('home-team')
-        gamestate_tree = game_tree.find('gamestate')
-        #print(f"Raw clock string in data: {gamestate_tree.get('gametime')}")
-        home = home_tree.get('nickname')
-        away = visiting_tree.get('nickname')
+    print(f'Got {len(games)} games!')
 
-            #Let's fuck around with some timezone bullshit:
-            #Apparently the API returns time in EST (UTC-5), even if EDT (UTC-4) is active..
-            #somewhere else a dst boolean is set, but i'm gonna rely on tzinfo to get that right.
+    for game in games:
+        matchup = game.get_matchup()
 
-        timeToParse = f"{gamestate_tree.get('gametime')} {yyyymmdd}"
-        parsedTime = dateutil.parser.parse(timeToParse).replace(tzinfo=tz.gettz('US/Eastern')) #set proper timezone
-        if parsedTime.timetuple().tm_isdst: #Adjust for EST/EDT discrepancy, if DST is active in ET.
-            parsedTime += datetime.timedelta(hours=1)
-        unix = parsedTime.timestamp()
-        start = int(unix)
+        if 'leafs' in matchup.lower():
+            print(f'{game.get_clock()} {matchup}, Score: Visitors: {game.away_score} Hosts: {game.home_score}')
 
-        games.append({
-            'league': league,
-            'start': start,
-            'home': home,
-            'away': away,
-            'home-score': home_tree.get('score'),
-            'away-score': visiting_tree.get('score'),
-            'status': gamestate_tree.get('status'),
-            'clock': gamestate_tree.get('display_status1'),  # gametime or local time??
-            'clock-section': gamestate_tree.get('display_status2')
-        })
-    #except Exception as e:
-    #    print(e)
-
-
-    if not games:
-        print(dt.date(),': no games')
-
-#        recursionCount=(dt - datetime.datetime.now(pytz.timezone('US/Pacific'))).days+1
-        recursionCount=(dt - datetime.datetime.now(dateutil.tz.gettz('US/Pacific'))).days+1
-
-        print(f"Currently checking {recursionCount} days in the future")
-        if recursionCount>28:
-            print('Hit recursion limit. Returning empty set.')
-            return [] #will this fail?
-        return today(league,dt + datetime.timedelta(days=1)) #recursive call with date incremented
-    #print games
     return games
+    #report = generateReport(focusTeam = 'Maple Leafs', localTimeZone='Europe / Berlin')
+
 
 def generateReport(focusTeam,localTimeZone):
-    #dt=datetime.datetime.now(pytz.timezone('US/Pacific'))
-    dt=datetime.datetime.now(dateutil.tz.gettz('US/Pacific'))
-    print(dt)
     report = None
-    rawList = today('NHL',dt)
+    rawList = getGames()
     #print(f'>>> DEBUG: {rawList}')
     try:
         for index,game in enumerate(rawList):
             if game!=None:
                 print(f'{index}:{game}')
-                if game["home"] == focusTeam or game["away"] == focusTeam:
+                if focusTeam in game.home_name or focusTeam in game.away_name:
                     print('\nMATCH!\n')
-                    if game["status"] == 'In-Progress': #active focusteam games in list
-                        report = f'1#{game["home"]}#{game["away"]}#{game["home-score"]}#{game["away-score"]}#{game["clock-section"]}#\r'
-                    elif game["status"] == "Pre-Game": #no active focusteam game in list
-                        report = f'0#{game["home"]}#{game["away"]}#{datetime.datetime.fromtimestamp(game["start"],tz=tz.gettz(localTimeZone))}#\r'
+                    if game.isLive(): #active focusteam games in list
+                        report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_clock}#\r'
+                    elif game.preGame(): #no active focusteam game in list
+                        report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
 
             if report!=None:
                 print(f'Matched {focusTeam} @ game number {index}')#: {game}')
