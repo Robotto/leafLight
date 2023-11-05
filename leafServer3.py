@@ -26,16 +26,17 @@ def getGames():
     games = []
     for game_info in data['games']:
         game = Game(game_info)
-        if game.is_scheduled_for_today() or True: #DEBUG: Append all games, and not just the ones for today
-            games.append(game)
+        #if game.is_scheduled_for_today():
+        ##if not game.isOver():
+        games.append(game) #Append all games, and not just the ones for today
 
     print(f'Got {len(games)} games!')
 
-    for game in games:
-        matchup = game.get_matchup()
+#    for game in games:
+#        matchup = game.get_matchup()
 
-        if 'leafs' in matchup.lower():
-            print(f'{game.get_clock()} {matchup}, Score: Visitors: {game.away_score} Hosts: {game.home_score}')
+#        if 'leafs' in matchup.lower():
+#            print(f'{game.get_clock()} {matchup}, Score: Visitors: {game.away_score} Hosts: {game.home_score}')
 
     return games
     #report = generateReport(focusTeam = 'Maple Leafs', localTimeZone='Europe / Berlin')
@@ -44,26 +45,20 @@ def getGames():
 def generateReport(focusTeam,localTimeZone):
     report = None
     rawList = getGames()
-    #print(f'>>> DEBUG: {rawList}')
-    try:
-        for index,game in enumerate(rawList):
-            if game!=None:
-                print(f'{index}:{game}')
-                if focusTeam in game.home_name or focusTeam in game.away_name:
-                    print('\nMATCH!\n')
-                    if game.isLive(): #active focusteam games in list
-                        report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_clock}#\r'
-                    elif game.preGame(): #no active focusteam game in list
-                        report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
 
-            if report!=None:
-                print(f'Matched {focusTeam} @ game number {index}')#: {game}')
-                return report
+    for index,game in enumerate(rawList):
+        if game!=None:
+            print(index,game)
+            if focusTeam in game.get_matchup().lower():
+                if game.isLive(): #active focusteam games in list
+                    report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_clock}#\r'
+                elif not game.isOver(): #no active focusteam game in list
+                    report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
 
-    except Exception as e:
-        print(f'>>> error in generation of report.. (empty data set?): {e}')
-        pass
-    print(f'>>> no games with {focusTeam} in set.')
+        if report!=None:
+            print(f'Matched {focusTeam} @ game number {index}: {game}')
+            return report
+    print(f'>>> no current or future games with {focusTeam} in set.')
     return 'e' + '\r'
 
 if __name__ == "__main__":
@@ -84,31 +79,31 @@ if __name__ == "__main__":
     print(f'Done.. Opening TCP port {TCP_PORT} on IP: {TCP_IP}')
 
     while True:
-        try:
-            conn, addr = s.accept()
-            print(f'{time.ctime()}: Connection from: {addr}')
-            #if str(addr) != '80.167.171.117':
-            #    print 'Wrong client IP. Connection refused'
-            #    conn.shutdown(socket.SHUT_RDWR)
-            #    conn.close()
-            #    continue
+    #    try:
+        conn, addr = s.accept()
+        print(f'{time.ctime()}: Connection from: {addr}')
+        #if str(addr) != '80.167.171.117':
+        #    print 'Wrong client IP. Connection refused'
+        #    conn.shutdown(socket.SHUT_RDWR)
+        #    conn.close()
+        #    continue
 
-            #            while True:  # looks like connection timeout is ~60 seconds.
+        #            while True:  # looks like connection timeout is ~60 seconds.
 
-            print(f'Looking for Maple Leafs games...')
-            report = generateReport(focusTeam = 'Maple Leafs', localTimeZone='Europe / Berlin')
-            conn.send(report.encode('utf-8'))  # +'\n')  # echo
-            print(f'TX: {report}')
-            print('Closing connection')
-            conn.shutdown(socket.SHUT_RDWR)
-            conn.close()
+        print(f'Looking for Maple Leafs games...')
+        report = generateReport(focusTeam = 'leafs', localTimeZone='Europe / Berlin')
+        conn.send(report.encode('utf-8'))  # +'\n')  # echo
+        print(f'TX: {report}')
+        print('Closing connection')
+        conn.shutdown(socket.SHUT_RDWR)
+        conn.close()
 
-            print('--------------------------')
-            print()
+        print('--------------------------')
+        print()
 
 
-        except Exception as e:
-            # print "hmm.. It looks like there was an error: " + str(e)
-            print(f'{time.ctime()}: Client disconnected... : {e}')
-            print('--------------------------')
-            conn.close()
+     #   except Exception as e:
+     #       # print "hmm.. It looks like there was an error: " + str(e)
+     #       print(f'{time.ctime()}: Client disconnected... : {e}')
+     #       print('--------------------------')
+     #       conn.close()

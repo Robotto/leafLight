@@ -27,18 +27,14 @@ class Game:
         self.home_score  = game_info['hts']
         self.home_result = game_info['htc']
 
-        if self.is_scheduled_for_today() and not (self.isLive() or self.isOver() or self.preGame()):
-            dt = datetime.datetime.now(dateutil.tz.gettz('US/Pacific'))
-            yyyymmdd = int(dt.strftime("%Y%m%d"))
-
-            #Parse game start times in local time (in this case CE(S)T:
-            timeToParse = f"{self.game_status} {yyyymmdd}"
-            parsedTime = dateutil.parser.parse(timeToParse).replace(tzinfo=tz.gettz('US/Eastern'))  # set proper timezone
+        self.normalize_today()
+        if not (self.isLive() or self.isOver() or self.preGame()):
+            timeToParse = f"{self.game_clock} {self.game_status}"
+            parsedTime = dateutil.parser.parse(timeToParse).replace(
+                tzinfo=tz.gettz('US/Eastern'))  # set proper timezone
             if parsedTime.timetuple().tm_isdst:  # Adjust for EST/EDT discrepancy, if DST is active in ET.
                 parsedTime += datetime.timedelta(hours=1)
-            unix = parsedTime.timestamp()
-            self.start = int(unix)
-            self.game_clock=time.strftime('%H:%M - %Z')
+            self.start = int(parsedTime.timestamp())
 
         # Playoff-specific game information
         if '03' in self.game_id[4:6]:
@@ -63,14 +59,6 @@ class Game:
                   ' visiting ' + self.home_locale + ' ' + self.home_name
         return matchup
 
-
-    def get_playoff_info(self):
-        """Get title of playoff series"""
-        playoff_info = playoff_series_info(self.playoff_round, self.playoff_series_id)
-        playoff_info += ' -- GAME ' + self.playoff_series_game
-        return playoff_info
-
-
     def get_clock(self):
         """Get game clock and status"""
         clock = self.game_clock + ' (' + self.game_status + ')'
@@ -94,12 +82,12 @@ class Game:
         return 'PRE GAME' in self.game_clock
 
     def normalize_today(self):
-        date = get_date(0)
+        date = get_date(0).upper()
 
         # must be today
-        if date.upper() in self.game_clock or \
+        if date in self.game_clock or \
                 'TODAY' in self.game_clock:
-            self.game_clock = 'TODAY'
+            self.game_clock = date
             return True
         # or must be pre-game
         elif 'PRE GAME' in self.game_clock:
@@ -118,8 +106,16 @@ class Game:
         else:
             return False
     def __str__(self):
-        if self.
-        if not self.isLive() and not self.isOver
+        if self.isOver():
+            return f'{self.game_clock} (GAME OVER): {self.away_name} visited {self.home_name}. Final score: {self.get_scoreline()}'
+        elif self.preGame():
+            return f'{self.game_clock} (PRE-GAME): {self.get_scoreline()}'
+        elif self.isLive():
+            return f'{self.game_clock} (LIVE GAME): {self.get_scoreline()}'
+        else:
+            return f'{self.game_clock}@{self.game_status} EDT: {self.away_name} visit {self.home_name}'
+
+
 '''
             for game in games:
                 game_summary = '\n'
