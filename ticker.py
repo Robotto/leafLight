@@ -117,7 +117,9 @@ class Game:
             return True
         else:
             return False
-
+    def __str__(self):
+        if self.
+        if not self.isLive() and not self.isOver
 '''
             for game in games:
                 game_summary = '\n'
