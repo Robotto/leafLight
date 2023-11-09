@@ -9,62 +9,59 @@ from ticker import Game
 
 def get_JSON(URL):
     "Request JSON from API server"
-    response = requests.get(URL)
-    # the live.nhle.com/ API has a wrapper, so remove it
-    if 'nhle' in URL:
-        response = response.text.replace('loadScoreboard(', '')
-        response = response.replace(')', '')
-    response = json.loads(response)
-    return response
+    try:
+        response = requests.get(URL)
+        # the live.nhle.com/ API has a wrapper, so remove it
+        if 'nhle' in URL:
+            response = response.text.replace('loadScoreboard(', '')
+            response = response.replace(')', '')
 
+        response = json.loads(response)
+        return response
+
+    except Exception as err:
+        print(f"Failed to fetch or parse json. {err=}, {type(err)=}")
+        return None
 def getGames():
     urlString = 'https://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp'
 
     data = get_JSON(urlString)
-    #print(f'Raw data: {data}')
-
     games = []
-    for game_info in data['games']:
-        game = Game(game_info)
-        #if game.is_scheduled_for_today():
-        ##if not game.isOver():
-        games.append(game) #Append all games, and not just the ones for today
+
+    if data != None:
+        for game_info in data['games']:
+            game = Game(game_info)
+            #if game.is_scheduled_for_today():
+            ##if not game.isOver():
+            games.append(game) #Append all games, and not just the ones for today
 
     print(f'Got {len(games)} games!')
-
-#    for game in games:
-#        matchup = game.get_matchup()
-
-#        if 'leafs' in matchup.lower():
-#            print(f'{game.get_clock()} {matchup}, Score: Visitors: {game.away_score} Hosts: {game.home_score}')
-
     return games
-    #report = generateReport(focusTeam = 'Maple Leafs', localTimeZone='Europe / Berlin')
 
 
 def generateReport(focusTeam,localTimeZone):
     report = None
     rawList = getGames()
 
-    for index,game in enumerate(rawList):
-        if game!=None:
-            print(index,game)
-            if focusTeam in game.get_matchup().lower():
-                if game.isLive(): #active focusteam games in list
-                    report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_clock}#\r'
-                elif not game.isOver(): #no active focusteam game in list
-                    report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
+    if len(rawList) != 0:
+        for index,game in enumerate(rawList):
+            if game!=None:
+                print(index,game)
+                if focusTeam in game.get_matchup().lower():
+                    if game.isLive(): #active focusteam games in list
+                        report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_clock}#\r'
+                    elif not game.isOver(): #no active focusteam game in list
+                        report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
 
-        if report!=None:
-            print(f'Matched {focusTeam} @ game number {index}: {game}')
-            return report
+            if report!=None:
+                print(f'Matched {focusTeam} @ game number {index}: {game}')
+                return report
     print(f'>>> no current or future games with {focusTeam} in set.')
     return 'e' + '\r'
 
 if __name__ == "__main__":
 
     print(f'{time.ctime()}: startup!')
-
 
     TCP_IP = socket.gethostbyname(socket.gethostname())
 
@@ -79,7 +76,6 @@ if __name__ == "__main__":
     print(f'Done.. Opening TCP port {TCP_PORT} on IP: {TCP_IP}')
 
     while True:
-    #    try:
         conn, addr = s.accept()
         print(f'{time.ctime()}: Connection from: {addr}')
         #if str(addr) != '80.167.171.117':
@@ -100,10 +96,3 @@ if __name__ == "__main__":
 
         print('--------------------------')
         print()
-
-
-     #   except Exception as e:
-     #       # print "hmm.. It looks like there was an error: " + str(e)
-     #       print(f'{time.ctime()}: Client disconnected... : {e}')
-     #       print('--------------------------')
-     #       conn.close()
