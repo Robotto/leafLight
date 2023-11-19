@@ -46,7 +46,7 @@ def generateReport(focusTeam,localTimeZone):
     if len(rawList) != 0:
         for index,game in enumerate(rawList):
             if game!=None:
-                print(index,game)
+                print(f'{index+1}:\t {game}')
                 if focusTeam in game.get_matchup().lower():
                     if game.isLive(): #active focusteam games in list
                         report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_clock}#\r'

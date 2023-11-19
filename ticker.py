@@ -107,13 +107,13 @@ class Game:
             return False
     def __str__(self):
         if self.isOver():
-            return f'{self.game_clock} (GAME OVER): {self.away_name} visited {self.home_name}. Final score: {self.get_scoreline()}'
+            return f'{self.game_clock} (GAME OVER): Result: {self.get_scoreline()}'
         elif self.preGame():
             return f'{self.game_clock} (PRE-GAME): {self.get_scoreline()}'
         elif self.isLive():
             return f'{self.game_clock} (LIVE GAME): {self.get_scoreline()}'
         else:
-            return f'{self.game_clock}@{self.game_status} EDT: {self.away_name} visit {self.home_name}'
+            return f'{self.game_clock}@{self.game_status} EDT: {self.away_name} @ {self.home_name}'
 
 
 '''
