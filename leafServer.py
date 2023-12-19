@@ -4,6 +4,7 @@
 
 import pytz
 import datetime
+import tzlocal
 import time
 import urllib2
 import json
@@ -100,7 +101,7 @@ def generateReport():
                     report = '1' + '#' + game['home'] + '#' + game['away'] + '#' + str(game['home-score']) + '#' + str(game['away-score']) + '#' + str(game['clock-section']) + '#' + '\r'
                     #print game['home'] + " [" + str(game['home-score']) + "]" + " vs. " + game['away'] + " [" + str(game['away-score']) + "]" + " in " + game['clock-section'] + " period."
                 elif game['status'] == 'Pre-Game': #no active focusteam game in list
-                    report = '0' + '#' + game['home'] + '#' + game['away'] + '#' + str(datetime.datetime.fromtimestamp(game['start'])) + '#' + '\r'
+                    report = '0' + '#' + game['home'] + '#' + game['away'] + '#' + str(datetime.datetime.fromtimestamp(game['start'],tz=tzlocal.get_localzone())) + '#' + '\r'
                     #print game['home'] + " vs. " + game['away'] + " @ " + str(datetime.datetime.fromtimestamp(game['start']))
                     #print game['home'] + " vs. " + game['away'] + " @ " + str(game['start'])
 
