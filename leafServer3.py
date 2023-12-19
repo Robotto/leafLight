@@ -88,11 +88,15 @@ if __name__ == "__main__":
 
         print(f'Looking for Maple Leafs games...')
         report = generateReport(focusTeam = 'leafs', localTimeZone='Europe / Berlin')
-        conn.send(report.encode('utf-8'))  # +'\n')  # echo
-        print(f'TX: {report}')
-        print('Closing connection')
-        conn.shutdown(socket.SHUT_RDWR)
-        conn.close()
+        try:
+            conn.send(report.encode('utf-8'))  # +'\n')  # echo
+            print(f'TX: {report}')
+            print('Closing connection')
+            conn.shutdown(socket.SHUT_RDWR)
+            conn.close()
+        except:
+            print(f'Error sending report: {report}...\nMaybe the client hung up?')
+
 
         print('--------------------------')
         print()
