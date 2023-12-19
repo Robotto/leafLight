@@ -128,14 +128,19 @@ if __name__ == "__main__":
     s.bind((TCP_IP, TCP_PORT))
     s.listen(1)
 
-    print 'Done.. Opening TCP port', TCP_PORT
+    print 'Done.. Opening TCP port ', TCP_PORT
 
     while True:
         try:
             conn, addr = s.accept()
             print time.ctime(), 'Connection from:', addr
+            #if str(addr) != '80.167.171.117':
+            #    print 'Wrong client IP. Connection refused'
+            #    conn.shutdown(socket.SHUT_RDWR)
+            #    conn.close()
+            #    continue
 
-#            while True:  # looks like connection timeout is ~60 seconds.
+            #            while True:  # looks like connection timeout is ~60 seconds.
 
             print 'Getting games. Looking for ' + focusTeam + ' games.'
             report = generateReport()
