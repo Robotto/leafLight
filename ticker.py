@@ -30,6 +30,8 @@ class Game:
         self.normalize_today()
         if not (self.isLive() or self.isOver() or self.preGame()):
             timeToParse = f"{self.game_clock} {self.game_status}"
+            if 'TBD' in timeToParse:
+                timeToParse = timeToParse.split('TBD')[0]
             parsedTime = dateutil.parser.parse(timeToParse).replace(
                 tzinfo=tz.gettz('US/Eastern'))  # set proper timezone
             if parsedTime.timetuple().tm_isdst:  # Adjust for EST/EDT discrepancy, if DST is active in ET.
