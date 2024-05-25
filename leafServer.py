@@ -44,17 +44,21 @@ def today(league,dt):
         json_str = jsonp.replace('shsMSNBCTicker.loadGamesData(', '').replace(');', '')
         #print json_str
         json_parsed = json.loads(json_str)
+        away = visiting_tree.get('nickname')
         for game_str in json_parsed.get('games', []):
             game_tree = ET.XML(game_str)
             visiting_tree = game_tree.find('visiting-team')
             home_tree = game_tree.find('home-team')
             gamestate_tree = game_tree.find('gamestate')
             home = home_tree.get('nickname')
-            away = visiting_tree.get('nickname')
             os.environ['TZ'] = 'US/Eastern'
-            start = int(
-                time.mktime(time.strptime('%s %d' % (gamestate_tree.get('gametime'), yyyymmdd), '%I:%M %p %Y%m%d')))
-            del os.environ['TZ']
+            start_str = gamestate_tree.get('gametime')
+            #if 'TBD' in start_str:
+            #    start_str = start_str.split('TBD')[0]
+            try:
+                start = int(time.mktime(time.strptime('%s %d' % (gamestate_tree.get('gametime'), yyyymmdd), '%I:%M %p %Y%m%d')))
+            except:
+                continue
 
             games.append({
                 'league': league,
@@ -67,6 +71,8 @@ def today(league,dt):
                 'clock': gamestate_tree.get('display_status1'),  # gametime or local time??
                 'clock-section': gamestate_tree.get('display_status2')
             })
+         del os.environ['TZ']
+
     except Exception, e:
         print e
 
