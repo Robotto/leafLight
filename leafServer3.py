@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import dateutil.parser, dateutil.tz as tz
 import datetime
 import time
@@ -24,6 +25,8 @@ def get_JSON(URL):
         return None
 def getGames():
     urlString = 'https://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp'
+
+    #Alternative URL for later use: https://api-web.nhle.com/v1/scoreboard/now
 
     data = get_JSON(urlString)
     games = []
