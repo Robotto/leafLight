@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import dateutil.parser, dateutil.tz as tz
 import datetime
 import time
@@ -26,6 +27,8 @@ def get_JSON(URL):
 def getGames():
     #urlString = 'https://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp'
     urlString = 'https://api-web.nhle.com/v1/scoreboard/TOR/now' #New url, documentation here: https://github.com/Zmalski/NHL-API-Reference?tab=readme-ov-file
+
+    #Alternative URL for later use: https://api-web.nhle.com/v1/scoreboard/now
 
     data = get_JSON(urlString)
 
