@@ -12,30 +12,49 @@ def get_JSON(URL):
     try:
         response = requests.get(URL)
         # the live.nhle.com/ API has a wrapper, so remove it
-        if 'nhle' in URL:
+
+        if 'live.nhle' in URL:
             response = response.text.replace('loadScoreboard(', '')
             response = response.replace(')', '')
 
-        response = json.loads(response)
+        response = json.loads(response.text)
         return response
 
     except Exception as err:
         print(f"Failed to fetch or parse json. {err=}, {type(err)=}")
         return None
 def getGames():
-    urlString = 'https://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp'
+    #urlString = 'https://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp'
+    urlString = 'https://api-web.nhle.com/v1/scoreboard/TOR/now' #New url, documentation here: https://github.com/Zmalski/NHL-API-Reference?tab=readme-ov-file
 
     data = get_JSON(urlString)
+
     games = []
 
     if data != None:
-        for game_info in data['games']:
-            game = Game(game_info)
-            #if game.is_scheduled_for_today():
-            ##if not game.isOver():
-            games.append(game) #Append all games, and not just the ones for today
+        for date in data['gamesByDate']:
+            gamesOnDate=0
+            for gameJson in date['games']:
+                gamesOnDate+=1
+                print(gameJson)
+                print(f'Gamestate: {gameJson['gameState']}')
+                #print(gameJson['startTimeUTC'])
+                #print(gameJson['gameState'])
+                #print(gameJson['awayTeam'])
+                #print(gameJson['homeTeam'])
 
-    print(f'Got {len(games)} games!')
+                game = Game(gameJson)
+                if not game.isOver():
+                    games.append(game)
+                    print(date['date'] + ': Got ' + str(gamesOnDate) + ' game.')
+                else:
+                    print(date['date'] + ': Got ' + str(gamesOnDate) + ' past game.')
+
+
+    print(f'Found {len(games)} future or ongoing games!')
+
+    for i in range(len(games)):
+        print(f'{i+1}: {games[i]}')
     return games
 
 
@@ -49,7 +68,7 @@ def generateReport(focusTeam,localTimeZone):
                 print(f'{index+1}:\t {game}')
                 if focusTeam in game.get_matchup().lower():
                     if game.isLive(): #active focusteam games in list
-                        report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_clock}#\r'
+                        report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_status}#\r'
                     elif not game.isOver(): #no active focusteam game in list
                         report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
 
@@ -72,6 +91,8 @@ if __name__ == "__main__":
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)  # make socket reuseable, for debugging (enables you to rerun the program before the socket has timed out)
     s.bind((TCP_IP, TCP_PORT))
     s.listen(1)
+
+    getGames()
 
     print(f'Done.. Opening TCP port {TCP_PORT} on IP: {TCP_IP}')
 
