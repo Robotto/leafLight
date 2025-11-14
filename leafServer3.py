@@ -44,8 +44,8 @@ def getGames():
                 #print(gameJson['homeTeam'])
                 game = Game(gameJson)
                 print(f'Parsed JSON @ date {date['date']}; gameState: "{gameJson['gameState']}",    >>> {game} <<<      , Full json: {gameJson}')
-                if not game.isOver():
-                    games.append(game)
+                #if not game.isOver():
+                games.append(game)
     print(f'Found {len(games)} future or ongoing games!')
 
     for i in range(len(games)):
@@ -53,22 +53,26 @@ def getGames():
     return games
 
 
-def generateReport(focusTeam,localTimeZone):
+def generateReport(focusTeam,localTimeZone): #TODO: Focus team isn't really necessary anymore since API url filters for team - 'TOR' is (TOR)onto maple leafs
     report = None
     rawList = getGames()
 
     if len(rawList) != 0:
         for index,game in enumerate(rawList):
             if game!=None:
-                print(f'{index+1}:\t {game}')
-                if focusTeam in game.get_matchup().lower():
-                    if game.isLive(): #active focusteam games in list
-                        report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_status}#\r'
-                    elif not game.isOver(): #no active focusteam game in list
-                        report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
+
+                #if focusTeam in game.get_matchup().lower():
+                if game.isLive() or game.preGame(): #Live game or pre-game
+                    print(f'Preparing message from game #{index + 1}:\t {game}')
+                    #Leaflight ESP expects something like:
+                    # Live game: 1#Maple Leafs#Blackhawks#4#3#FINAL#\r
+                    # future game: 0#Blackhawks#Maple Leafs#2025-11-16 01:00:00#\r
+                    report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_status}#\r'
+                elif not game.isOver(): #Future game or pre-game
+                    print(f'Preparing message from game #{index + 1}:\t {game}')
+                    report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
 
             if report!=None:
-                print(f'Matched {focusTeam} @ game number {index}: {game}')
                 return report
     print(f'>>> no current or future games with {focusTeam} in set.')
     return 'e' + '\r'

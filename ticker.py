@@ -55,8 +55,8 @@ class Game:
 
     def get_scoreline(self):
         """Get current score in butterfly format"""
-        score = self.away_name + ' ' + str(self.away_score) + \
-                " - " + str(self.home_score) + ' ' + self.home_name
+        score = self.away_name + ' '*(15-len(self.away_name)) + str(self.away_score) + \
+                " - " + str(self.home_score) + '\t' + self.home_name + ' '*(15-len(self.home_name))
         return score
 
 
@@ -64,12 +64,27 @@ class Game:
         """Get full names of both teams"""
         matchup = self.away_locale + ' ' + self.away_name + \
                   ' visiting ' + self.home_locale + ' ' + self.home_name
+        matchup += ' '*(50-len(matchup))
         return matchup
 
+    def leafsWon(self): #returns difference between leaf's score and opponent's score
+        if self.isOver():
+            if 'Leafs' in self.home_name:
+                return self.home_score-self.away_score
+            return self.away_score-self.home_score
+        return None
 
+    def get_leafsWinString(self): #dilly-dallying with scorecounts and smileys..
+        if self.leafsWon()>0:
+            return ":D "*self.leafsWon()
+        elif self.leafsWon()<0:
+            return ":( "*(self.leafsWon()*(-1))
+        else:
+            return ":|"
     '''
+    
     Game states: 
-    So far we've seen the following strings: 
+    So far I've seen the following strings: 
     
     'FUT' - Future game
     'PRE' - Pre-game (About 30 minutes before face-off)
@@ -96,13 +111,15 @@ class Game:
 
     def __str__(self):
         if self.isOver():
-            return f'{self.startTimeUTC} (GAME OVER): Result: {self.get_scoreline()}'
+            return f'{self.startTimeUTC} (GAME OVER): \t\t{self.get_matchup()} \t Result: {self.get_scoreline()} \t\t\t {self.get_leafsWinString()}'
         elif self.preGame():
-            return f'{self.startTimeUTC} (PRE-GAME): {self.get_scoreline()}'
+            return f'{self.startTimeUTC} (PRE-GAME): \t\t{self.get_matchup()}'
         elif self.isLive():
-            return f'{self.startTimeUTC} (LIVE GAME): {self.get_scoreline()}'
+            return f'{self.startTimeUTC} (LIVE GAME): \t\t{self.get_matchup()} \t Score: {self.get_scoreline()}'
+        elif self.futureGame():
+            return f'{self.startTimeUTC} (FUTURE GAME): \t{self.get_matchup()}'
         else:
-            return f'{self.startTimeUTC}: {self.away_name} @ {self.home_name}'
+            return f'{self.startTimeUTC} (RAW gameState: \t{self.game_status}):\t\t\t\t {self.get_matchup()}'
 
 '''
 
