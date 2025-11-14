@@ -9,7 +9,7 @@ import json
 from ticker import Game
 
 def get_JSON(URL):
-    "Request JSON from API server"
+    print(f'Requesting JSON from API server ({URL})')
     try:
         response = requests.get(URL)
         # the live.nhle.com/ API has a wrapper, so remove it
@@ -22,7 +22,7 @@ def get_JSON(URL):
         return response
 
     except Exception as err:
-        print(f"Failed to fetch or parse json. {err=}, {type(err)=}")
+        print(f"Failed to fetch or parse json from {URL}: {err=}, {type(err)=}")
         return None
 def getGames():
     #urlString = 'https://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp'
@@ -36,24 +36,16 @@ def getGames():
 
     if data != None:
         for date in data['gamesByDate']:
-            gamesOnDate=0
             for gameJson in date['games']:
-                gamesOnDate+=1
-                print(gameJson)
-                print(f'Gamestate: {gameJson['gameState']}')
+                #print(f'Gamestate: {gameJson['gameState']}')
                 #print(gameJson['startTimeUTC'])
                 #print(gameJson['gameState'])
                 #print(gameJson['awayTeam'])
                 #print(gameJson['homeTeam'])
-
                 game = Game(gameJson)
+                print(f'Parsed JSON @ date {date['date']}; gameState: "{gameJson['gameState']}",    >>> {game} <<<      , Full json: {gameJson}')
                 if not game.isOver():
                     games.append(game)
-                    print(date['date'] + ': Got ' + str(gamesOnDate) + ' game.')
-                else:
-                    print(date['date'] + ': Got ' + str(gamesOnDate) + ' past game.')
-
-
     print(f'Found {len(games)} future or ongoing games!')
 
     for i in range(len(games)):

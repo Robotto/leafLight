@@ -14,7 +14,9 @@ class Game:
     """Game represents a scheduled NHL game"""
     def __init__(self, game_info):
         """Parse JSON to attributes"""
+
         '''
+        #Dict keys in old API:
         self.game_id     = str(game_info['id'])
         self.game_clock  = game_info['ts']
         self.game_stage  = game_info['tsc']
@@ -34,18 +36,18 @@ class Game:
 
         self.away_locale = game_info['awayTeam']['placeNameWithPreposition']['default']
         self.away_name = game_info['awayTeam']['commonName']['default']
-        self.away_score=0
-        self.home_score=0
+        self.away_score = 0
+        self.home_score = 0
         self.home_name = game_info['homeTeam']['commonName']['default']
         self.home_locale = game_info['homeTeam']['placeNameWithPreposition']['default']
 
-        if 'FUT' not in self.game_status:
-            self.away_score = game_info['awayTeam']['score']
-            self.home_score = game_info['homeTeam']['score']
+        if self.isLive() or self.isOver():
+            try:
+                self.away_score = game_info['awayTeam']['score']
+                self.home_score = game_info['homeTeam']['score']
+            except:
+                print(f"Gamestate: {self.game_status}, But no score keys in dict... yet")
 
-
-
-        #self.normalize_today()
         self.startTimeUTC = datetime.datetime.fromisoformat(game_info['startTimeUTC'][:-1] + '+00:00')
         self.start = self.startTimeUTC.timestamp()
         self.gameDate = game_info['gameDate']
@@ -64,15 +66,31 @@ class Game:
                   ' visiting ' + self.home_locale + ' ' + self.home_name
         return matchup
 
-    def isLive(self):
-       # return 'ON' in self.game_status #TODO: Determine what the actual string is...
-        return (not self.isOver() and not self.preGame())
+
+    '''
+    Game states: 
+    So far we've seen the following strings: 
+    
+    'FUT' - Future game
+    'PRE' - Pre-game (About 30 minutes before face-off)
+    ''  - Expecting some info about periods here.. 
+    ''
+    ''
+    'FINAL' - Haven't actually seen this myself, but it's here: https://gitlab.com/dword4/nhlapi/-/blob/master/new-api.md
+    'OFF' - Game over man, game over...
+    '''
 
     def isOver(self):
         return 'OFF' in self.game_status
 
     def preGame(self):
+        return 'PRE' in self.game_status
+
+    def futureGame(self):
         return 'FUT' in self.game_status
+
+    def isLive(self):
+        return (not self.futureGame() and not self.isOver() and not self.preGame())
 
 
 
