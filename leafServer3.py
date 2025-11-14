@@ -8,6 +8,8 @@ import requests
 import json
 from ticker import Game
 
+knownGameStates = []
+
 def get_JSON(URL):
     print(f'Requesting JSON from API server ({URL})')
     try:
@@ -37,19 +39,27 @@ def getGames():
     if data != None:
         for date in data['gamesByDate']:
             for gameJson in date['games']:
+                state = gameJson['gameState']
+                if gameJson['gameState'] not in knownGameStates:
+                    print(f'{state} not in knownGameStates')
+                    knownGameStates.append(state)
+                    print(f'knownGameStates: {knownGameStates}')
+                    print(f'JSON: {gameJson}')
+
                 #print(f'Gamestate: {gameJson['gameState']}')
                 #print(gameJson['startTimeUTC'])
                 #print(gameJson['gameState'])
                 #print(gameJson['awayTeam'])
                 #print(gameJson['homeTeam'])
                 game = Game(gameJson)
-                print(f'Parsed JSON @ date {date['date']}; gameState: "{gameJson['gameState']}",    >>> {game} <<<      , Full json: {gameJson}')
+                #print(f'Parsed JSON @ date {date['date']}; gameState: "{gameJson['gameState']}",    >>> {game} <<<      , Full json: {gameJson}')
                 #if not game.isOver():
                 games.append(game)
     print(f'Found {len(games)} future or ongoing games!')
 
-    for i in range(len(games)):
-        print(f'{i+1}: {games[i]}')
+    #Print found games:
+    #for i in range(len(games)):
+    #    print(f'{i+1}: {games[i]}')
     return games
 
 

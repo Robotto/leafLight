@@ -30,9 +30,13 @@ class Game:
         self.home_score  = game_info['hts']
         self.home_result = game_info['htc']
         '''
+
+
         self.game_id = str(game_info['id'])
         self.game_stage = game_info['venue']['default']
         self.game_status = game_info['gameState']
+
+
 
         self.away_locale = game_info['awayTeam']['placeNameWithPreposition']['default']
         self.away_name = game_info['awayTeam']['commonName']['default']
