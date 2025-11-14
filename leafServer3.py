@@ -46,6 +46,10 @@ def getGames():
                     print(f'knownGameStates: {knownGameStates}')
                     print(f'JSON: {gameJson}')
 
+                    with open("knownStates.txt", "a") as f:
+                        f.write(f'{state} not in knownGameStates! ')
+                        f.write(f'JSON:\n{gameJson}\n\n')
+
                 #print(f'Gamestate: {gameJson['gameState']}')
                 #print(gameJson['startTimeUTC'])
                 #print(gameJson['gameState'])
