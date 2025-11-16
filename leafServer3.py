@@ -8,7 +8,9 @@ import requests
 import json
 from ticker import Game
 
-knownGameStates = []
+knownGameStates = ['OFF','FUT','PRE','LIVE','CRIT','FINAL']
+lastReport = ""
+
 
 def get_JSON(URL):
     print(f'Requesting JSON from API server ({URL})')
@@ -68,6 +70,7 @@ def getGames():
 
 
 def generateReport(focusTeam,localTimeZone): #TODO: Focus team isn't really necessary anymore since API url filters for team - 'TOR' is (TOR)onto maple leafs
+    global lastReport
     report = None
     rawList = getGames()
 
@@ -76,17 +79,24 @@ def generateReport(focusTeam,localTimeZone): #TODO: Focus team isn't really nece
             if game!=None:
 
                 #if focusTeam in game.get_matchup().lower():
-                if game.isLive() or game.preGame(): #Live game or pre-game
+                if game.isLive(): #Live game or pre-game
                     print(f'Preparing message from game #{index + 1}:\t {game}')
                     #Leaflight ESP expects something like:
-                    # Live game: 1#Maple Leafs#Blackhawks#4#3#FINAL#\r
-                    # future game: 0#Blackhawks#Maple Leafs#2025-11-16 01:00:00#\r
-                    report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.game_status}#\r'
+                    # Live game: 1#Maple Leafs#Blackhawks#4#3#P3: T-13:37#\r
+                    report = f'1#{game.home_name}#{game.away_name}#{game.home_score}#{game.away_score}#{game.get_periodline()}#\r'
                 elif not game.isOver(): #Future game or pre-game
+                    # future game: 0#Blackhawks#Maple Leafs#2025-11-16 01:00:00#\r
                     print(f'Preparing message from game #{index + 1}:\t {game}')
                     report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#\r'
 
-            if report!=None:
+                if report!=None:
+                    if report != lastReport:
+                        with open("transMittedReports.txt", "a") as f:
+
+                            f.write(f'{time.ctime()}: New report:\n{report}')
+                            f.write(f'Generated from game JSON: \n{game.gameJson}\n\n')
+                            print('New report appended to logfile')
+                        lastReport=report
                 return report
     print(f'>>> no current or future games with {focusTeam} in set.')
     return 'e' + '\r'
@@ -128,6 +138,8 @@ if __name__ == "__main__":
             print('Closing connection')
             conn.shutdown(socket.SHUT_RDWR)
             conn.close()
+
+
         except:
             print(f'Error sending report: {report}...\nMaybe the client hung up?')
 

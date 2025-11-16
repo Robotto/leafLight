@@ -14,7 +14,7 @@ class Game:
     """Game represents a scheduled NHL game"""
     def __init__(self, game_info):
         """Parse JSON to attributes"""
-
+        self.gameJson = game_info
         '''
         #Dict keys in old API:
         self.game_id     = str(game_info['id'])
@@ -51,6 +51,17 @@ class Game:
                 self.home_score = game_info['homeTeam']['score']
             except:
                 print(f"Gamestate: {self.game_status}, But no score keys in dict... yet")
+        if self.isLive():
+            #'period': 1, 'periodDescriptor': {'number': 1, 'periodType': 'REG', 'maxRegulationPeriods': 3}, 'clock': {'timeRemaining': '20:00', 'secondsRemaining': 1200, 'running': False, 'inIntermission': False}}
+            try:
+                self.period = game_info['period']
+                self.periodCountdown = game_info['clock']['timeRemaining']
+            except:
+                print(f'expected period and clock info when gamestate is {self.game_status}, but failed...')
+                if self.period is None:
+                    self.period = 0
+                if self.periodCountdown is None:
+                    self.periodCountdown = "00:00"
 
         self.startTimeUTC = datetime.datetime.fromisoformat(game_info['startTimeUTC'][:-1] + '+00:00')
         self.start = self.startTimeUTC.timestamp()
@@ -62,6 +73,9 @@ class Game:
         score = self.away_name + ' '*(15-len(self.away_name)) + str(self.away_score) + \
                 " - " + str(self.home_score) + '\t' + self.home_name + ' '*(15-len(self.home_name))
         return score
+
+    def get_periodline(self):
+        return f'P{self.period}: T-{self.periodCountdown}'
 
 
     def get_matchup(self):
@@ -92,15 +106,14 @@ class Game:
     
     'FUT' - Future game
     'PRE' - Pre-game (About 30 minutes before face-off)
-    ''  - Expecting some info about periods here.. 
-    ''
-    ''
-    'FINAL' - Haven't actually seen this myself, but it's here: https://gitlab.com/dword4/nhlapi/-/blob/master/new-api.md
+    'LIVE'    
+    'CRIT'  
+    'FINAL' 
     'OFF' - Game over man, game over...
     '''
 
     def isOver(self):
-        return 'OFF' in self.game_status
+        return 'OFF' in self.game_status or 'FINAL' in self.game_status
 
     def preGame(self):
         return 'PRE' in self.game_status
@@ -109,7 +122,7 @@ class Game:
         return 'FUT' in self.game_status
 
     def isLive(self):
-        return (not self.futureGame() and not self.isOver() and not self.preGame())
+        return 'LIVE' in self.game_status or 'CRIT' in self.game_status
 
 
 
