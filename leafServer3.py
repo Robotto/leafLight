@@ -95,9 +95,9 @@ def generateReport(focusTeam,localTimeZone): #TODO: Focus team isn't really nece
 
                             f.write(f'{time.ctime()}: New report:\n{report}')
                             f.write(f'Generated from game JSON: \n{game.gameJson}\n\n')
-                            print('New report appended to logfile')
+                        print('New report appended to logfile')
                         lastReport=report
-                return report
+                    return report
     print(f'>>> no current or future games with {focusTeam} in set.')
     return 'e' + '\r'
 
