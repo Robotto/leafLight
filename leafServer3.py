@@ -93,8 +93,10 @@ def generateReport(focusTeam,localTimeZone): #TODO: Focus team isn't really nece
                     if report != lastReport:
                         with open("transMittedReports.txt", "a") as f:
 
-                            f.write(f'{time.ctime()} - New report:\n{report}\n\n')
+                            f.write(f'{time.ctime()} - New report:\n{report}\n')
+                            f.write(f'{game}\n')
                             f.write(f'Generated from game JSON: \n{game.gameJson}\n\n')
+
                         print('New report appended to logfile')
                         lastReport=report
                     return report
