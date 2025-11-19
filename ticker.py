@@ -75,7 +75,12 @@ class Game:
         return score
 
     def get_periodline(self):
-        return f'P{self.period}: T-{self.periodCountdown}'
+
+        if self.period>3:
+            P='OT'
+        else:
+            P="P"+str(self.period)
+        return f'{P}: T-{self.periodCountdown}'
 
 
     def get_matchup(self):
