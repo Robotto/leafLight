@@ -90,6 +90,7 @@ def generateReport(focusTeam,localTimeZone): #TODO: Focus team isn't really nece
                     report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#{game.startCountDown}#\r'
 
                 if report!=None:
+                    '''
                     if report != lastReport:
                         with open("transMittedReports.txt", "a") as f:
 
@@ -99,6 +100,7 @@ def generateReport(focusTeam,localTimeZone): #TODO: Focus team isn't really nece
 
                         print('New report appended to logfile')
                         lastReport=report
+                    '''
                     return report
     print(f'>>> no current or future games with {focusTeam} in set.')
     return 'e' + '\r'
