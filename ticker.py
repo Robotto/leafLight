@@ -88,7 +88,7 @@ class Game:
     def get_matchup(self):
         """Get full names of both teams"""
         matchup = self.away_locale + ' ' + self.away_name + \
-                  ' visiting ' + self.home_locale + ' ' + self.home_name
+                  ' @ ' + self.home_locale + ' ' + self.home_name
         matchup += ' '*(50-len(matchup))
         return matchup
 
@@ -135,15 +135,15 @@ class Game:
 
     def __str__(self):
         if self.isOver():
-            return f'{self.startTimeUTC} (GAME OVER): \t\t{self.get_matchup()} \t Result: {self.get_scoreline()} \t\t\t {self.get_leafsWinString()}'
+            return f'{self.startTimeUTC} (GAME OVER): \t{self.get_matchup()} \t Result: {self.get_scoreline()} \t {self.get_leafsWinString()}'
         elif self.preGame():
             return f'{self.startTimeUTC} (PRE-GAME): \t\t{self.get_matchup()}'
         elif self.isLive():
-            return f'{self.startTimeUTC} (LIVE GAME): \t\t{self.get_matchup()} \t Score: {self.get_scoreline()}'
+            return f'{self.startTimeUTC} (LIVE GAME): \t\t{self.get_matchup()}   \t Score: {self.get_scoreline()}'
         elif self.futureGame():
-            return f'{self.startTimeUTC} (FUTURE GAME): \t{self.get_matchup()} in {self.startCountDown} seconds'
+            return f'{self.startTimeUTC} (FUTURE GAME): \t{self.get_matchup()}   \t in {self.startCountDown} seconds'
         else:
-            return f'{self.startTimeUTC} (RAW gameState: \t{self.game_status}):\t\t\t\t {self.get_matchup()}'
+            return f'{self.startTimeUTC} (RAW gameState: \t{self.game_status}): \t\t\t\t {self.get_matchup()}'
 
 '''
 
