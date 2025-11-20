@@ -3,7 +3,7 @@
 
 #include <ArduinoOTA.h>
 
-#include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
+//#include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
 //#include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
 #include <SSD1306Wire.h> //https://github.com/ThingPulse/esp8266-oled-ssd1306
 
@@ -49,9 +49,6 @@ SSD1306Wire  display(0x3c, D2, D1);
 //URL informationer
 const char* host = "sardukar.moore.dk"; //
 
-//WiFi informationer
-//const char* ssid     = "If it bleeds we can kill it!";
-//const char* password = "redact";
 
 int blinkPin = D6;
 
@@ -175,7 +172,6 @@ void setup() {
   }
 
 
-  //wifiConnect();
 }
 
 void alarm()
@@ -230,6 +226,7 @@ bool scoreByAway;
 
 void loop() {
 unsigned long sleepTimeSeconds=30;
+unsigned long countdown;
 
 WiFiClient client;
 const int httpPort = 9999;
@@ -264,7 +261,6 @@ const int httpPort = 9999;
     Serial.println();
     Serial.println(">>> Disconnecting.");
 
-    unsigned long countdown;
     countdown = parseLine(line);
 
     }
@@ -274,7 +270,7 @@ const int httpPort = 9999;
     else sleepTimeSeconds=30;
 
 
-    Serial.println(">>> Sleep until 30 seconds game starts or 30 seconds if game is live.");
+    Serial.println(">>> Sleep until 30 seconds before game starts or 30 seconds if game is live.");
     delay(sleepTimeSeconds*1000);
     //delay(15000);
 
@@ -338,6 +334,8 @@ unsigned long parseLine(String line)
         //Serial.print("pound2 index: "); Serial.println(pound2);
         //Serial.print("pound3 index: "); Serial.println(pound3);
         //Serial.print("pound4 index: "); Serial.println(pound4);
+        //Serial.print("pound5 index: "); Serial.println(pound5);
+
 
 
         gameStart = line.substring(pound3+1,pound4);
