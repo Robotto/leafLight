@@ -223,11 +223,13 @@ int pound6;
 
 int oldHomeScore;
 int oldAwayScore;
+unsigned long gameStartsInSeconds = 0;
 
 bool scoreByHome;
 bool scoreByAway;
 
 void loop() {
+unsigned long sleepTimeSeconds=30;
 
 WiFiClient client;
 const int httpPort = 9999;
@@ -262,16 +264,18 @@ const int httpPort = 9999;
     Serial.println();
     Serial.println(">>> Disconnecting.");
 
-    parseLine(line);
+    unsigned long countdown;
+    countdown = parseLine(line);
 
     }
 
-   
-   
+
+    if(countdown>30) sleepTimeSeconds=countdown-30;
+    else sleepTimeSeconds=30;
 
 
-    Serial.println(">>> Sleep for 2 minutes.");
-    delay(2*60*1000);
+    Serial.println(">>> Sleep until 30 seconds game starts or 30 seconds if game is live.");
+    delay(sleepTimeSeconds*1000);
     //delay(15000);
 
 //if((char)tcpBuffer[0]=='1') Serial.println("active game!");
@@ -281,15 +285,17 @@ const int httpPort = 9999;
 }
 
 
-void parseLine(String line)
+unsigned long parseLine(String line)
 {
+    unsigned long countdown=0; //returns seconds to game start. 0 if active game
+
     if(line.charAt(0) == '1') activeGame=true;
 
     else if(line.charAt(0) == '0') activeGame=false;//upcoming games in data
 
-    else if(line.charAt(0) == 'e') { drawLeaf(); return; }//no games with target team in data 
+    else if(line.charAt(0) == 'e') { drawLeaf(); return countdown; }//no games with target team in data
 
-    else { drawLeaf(); return; }//error in data
+    else { drawLeaf(); return countdown; }//error in data
     
     //1#Blackhawks#Lightning#2#4#1st quarter#
     // |          |         | | |           |
@@ -315,9 +321,9 @@ void parseLine(String line)
 
       }
 
-    //0#Blackhawks#Lightning#2017-01-25 02:30:00#
-    // |          |         |                   |
-    // 1          2         3                   4
+    //0#Blackhawks#Lightning#2017-01-25 02:30:00#54000#
+    // |          |         |                   |     |
+    // 1          2         3                   4     5
 
 
     else{ 
@@ -327,6 +333,7 @@ void parseLine(String line)
         pound2=line.indexOf('#',2);
         pound3=line.indexOf('#',pound2+1);
         pound4=line.indexOf('#',pound3+1);
+        pound5=line.indexOf('#',pound4+1);
 
         //Serial.print("pound2 index: "); Serial.println(pound2);
         //Serial.print("pound3 index: "); Serial.println(pound3);
@@ -334,6 +341,8 @@ void parseLine(String line)
 
 
         gameStart = line.substring(pound3+1,pound4);
+        countdown = (unsigned long)(line.substring(pound4+1,pound5).toInt());
+
       }
 
     homeTeam = line.substring(2,pound2);
@@ -400,7 +409,7 @@ void parseLine(String line)
 
       }
 
-    
+    return countdown;
 
 }
   

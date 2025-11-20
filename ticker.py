@@ -65,6 +65,8 @@ class Game:
 
         self.startTimeUTC = datetime.datetime.fromisoformat(game_info['startTimeUTC'][:-1] + '+00:00')
         self.start = self.startTimeUTC.timestamp()
+        self.startCountDown = int(self.start-time.time())
+        #print(f'Game starts in {self.startCountDown} seconds')
         self.gameDate = game_info['gameDate']
 
 
@@ -139,7 +141,7 @@ class Game:
         elif self.isLive():
             return f'{self.startTimeUTC} (LIVE GAME): \t\t{self.get_matchup()} \t Score: {self.get_scoreline()}'
         elif self.futureGame():
-            return f'{self.startTimeUTC} (FUTURE GAME): \t{self.get_matchup()}'
+            return f'{self.startTimeUTC} (FUTURE GAME): \t{self.get_matchup()} in {self.startCountDown} seconds'
         else:
             return f'{self.startTimeUTC} (RAW gameState: \t{self.game_status}):\t\t\t\t {self.get_matchup()}'
 
