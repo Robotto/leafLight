@@ -87,7 +87,7 @@ def generateReport(focusTeam,localTimeZone): #TODO: Focus team isn't really nece
                 elif not game.isOver(): #Future game or pre-game
                     # future game: 0#Blackhawks#Maple Leafs#2025-11-16 01:00:00#54000#\r
                     print(f'Preparing message from game #{index + 1}:\t {game}')
-                    report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone))}#{game.startCountDown}#\r'
+                    report = f'0#{game.home_name}#{game.away_name}#{datetime.datetime.fromtimestamp(game.start,tz=tz.gettz(localTimeZone)).strftime('%d/%m %Y %H:%M:%S')}#{game.startCountDown}#\r'
 
                 if report!=None:
                     '''
@@ -119,7 +119,10 @@ if __name__ == "__main__":
     s.bind((TCP_IP, TCP_PORT))
     s.listen(1)
 
-    getGames()
+    #getGames()
+    print(f'Testrun at startup:')
+    print(generateReport(focusTeam='leafs', localTimeZone='Europe / Berlin'))
+
 
     print(f'Done.. Opening TCP port {TCP_PORT} on IP: {TCP_IP}')
 
