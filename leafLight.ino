@@ -230,6 +230,7 @@ unsigned long countdown;
 
 WiFiClient client;
 const int httpPort = 9999;
+ArduinoOTA.handle();
 
   if (!client.connect(host, httpPort)) {
     Serial.println(">>> tcp connection failed!");
@@ -238,6 +239,7 @@ const int httpPort = 9999;
 
   unsigned long timeout = millis();
   while (client.available() == 0) {
+    yield();
     if (millis() - timeout > 5000) {
       Serial.println(">>> Client Timeout !");
       client.stop();
@@ -262,6 +264,7 @@ const int httpPort = 9999;
     Serial.println(">>> Disconnecting.");
 
     countdown = parseLine(line);
+    yield();
 
     }
 
@@ -271,7 +274,13 @@ const int httpPort = 9999;
 
 
     Serial.println(">>> Sleep until 30 seconds before game starts or 30 seconds if game is live.");
-    delay(sleepTimeSeconds*1000);
+    Serial.print(">>> SleepTimeSeconds: ");
+    Serial.println(sleepTimeSeconds);
+    for(int i=0;i<sleepTimeSeconds;i++){
+      ArduinoOTA.handle();
+      delay(1000);
+    }
+    
     //delay(15000);
 
 //if((char)tcpBuffer[0]=='1') Serial.println("active game!");
@@ -281,9 +290,9 @@ const int httpPort = 9999;
 }
 
 
-unsigned long parseLine(String line)
+long parseLine(String line)
 {
-    unsigned long countdown=0; //returns seconds to game start. 0 if active game
+    long countdown=0; //returns seconds to game start. 0 if active game
 
     if(line.charAt(0) == '1') activeGame=true;
 
@@ -339,7 +348,7 @@ unsigned long parseLine(String line)
 
 
         gameStart = line.substring(pound3+1,pound4);
-        countdown = (unsigned long)(line.substring(pound4+1,pound5).toInt());
+        countdown = (long)(line.substring(pound4+1,pound5).toInt());
 
       }
 
@@ -386,7 +395,7 @@ unsigned long parseLine(String line)
         }
       }
     else{
-        Serial.print("Game starts at: "); Serial.println(gameStart);
+        Serial.print("Game starts at: "); Serial.print(gameStart); Serial.print(" (in "); Serial.print(countdown); Serial.println(" seconds)");
 
         //print upcoming game info
         display.clear();
